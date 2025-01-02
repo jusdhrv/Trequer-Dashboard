@@ -1,70 +1,103 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Settings, RefreshCw } from 'lucide-react'
 import { Button } from "./ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "./ui/sheet"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Label } from "./ui/label"
-import { Input } from "./ui/input"
-import { JsonEditor } from './JsonEditor'
-import { useToast } from "../hooks/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
+import { Settings, RefreshCw } from 'lucide-react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { processReadings } from '../lib/utils'
 
 interface GraphWidgetProps {
-  title: string
-  initialData: any[]
+  title: string;
+  sensorType: string;
 }
 
-export default function GraphWidget({ title, initialData }: GraphWidgetProps) {
-  const [data, setData] = useState(initialData)
+export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
+  const [data, setData] = useState<any[]>([])
   const [timeRange, setTimeRange] = useState('1h')
-  const [sourcePin, setSourcePin] = useState('A0')
-  const [dataType, setDataType] = useState('analog')
-  const [scanFrequency, setScanFrequency] = useState('1')
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const { toast } = useToast()
+  const [isSettingsChanged, setIsSettingsChanged] = useState(false)
+  const [selectedSource, setSelectedSource] = useState('primary')
+  const [pollingInterval, setPollingInterval] = useState('30s')
 
-  const handleDataUpdate = (newData: any[]) => {
-    setData(newData)
-    showUpdateNotification()
+  const fetchData = async () => {
+    try {
+      setIsSettingsChanged(true)
+      const response = await fetch(`/api/sensors?timeRange=${timeRange}&source=${selectedSource}`)
+      const result = await response.json()
+
+      if (result.readings) {
+        setData(processReadings(result.readings, sensorType, timeRange))
+      }
+    } catch (error) {
+      console.error('Error fetching sensor data:', error)
+    } finally {
+      setTimeout(() => setIsSettingsChanged(false), 1000)
+    }
   }
+
+  useEffect(() => {
+    fetchData()
+
+    // Set up polling based on selected interval
+    const intervalMs = pollingInterval === '10s' ? 10000
+      : pollingInterval === '30s' ? 30000
+        : pollingInterval === '1m' ? 60000
+          : pollingInterval === '5m' ? 300000
+            : 30000 // default to 30s
+
+    const interval = setInterval(fetchData, intervalMs)
+    return () => clearInterval(interval)
+  }, [timeRange, sensorType, selectedSource, pollingInterval])
 
   const handleTimeRangeChange = (value: string) => {
     setTimeRange(value)
-    // Here you would typically fetch new data based on the selected time range
-    // For this example, we'll just update the x-axis labels
-    const newData = data.map((item, index) => ({
-      ...item,
-      name: `${index * parseInt(value)}${value.slice(-1)}`,
-    }))
-    setData(newData)
-    showUpdateNotification()
   }
 
-  const handleSettingChange = () => {
-    showUpdateNotification()
+  const handleSourceChange = (value: string) => {
+    setSelectedSource(value)
   }
 
-  const showUpdateNotification = () => {
-    toast({
-      title: "Graph Updated",
-      description: "The graph settings have been updated.",
-    })
+  const handlePollingChange = (value: string) => {
+    setPollingInterval(value)
   }
 
   const handleRefresh = () => {
-    setIsRefreshing(true)
-    // Simulate data fetching
-    setTimeout(() => {
-      const newData = data.map(item => ({
-        ...item,
-        value: Math.random() * 100
-      }))
-      setData(newData)
-      setIsRefreshing(false)
-    }, 2000)
+    fetchData()
+  }
+
+  const getYAxisDomain = () => {
+    if (data.length === 0) return [0, 100]
+    const values = data.map(d => d.value)
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const padding = (max - min) * 0.1
+    return [Math.max(0, min - padding), max + padding]
+  }
+
+  const formatTooltipTime = (index: number) => {
+    const item = data[index]
+    if (!item || !item.timestamp) return ''
+    const date = new Date(item.timestamp)
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+  }
+
+  const formatXAxisTick = (index: number) => {
+    switch (timeRange) {
+      case '1h':
+        return `${index}min`
+      case '6h':
+        return `${index * 5}min`
+      case '24h':
+        return `${index * 15}min`
+      case '7d':
+        return `${index}h`
+      case '14d':
+        return `${index * 2}h`
+      default:
+        return index.toString()
+    }
   }
 
   return (
@@ -83,61 +116,48 @@ export default function GraphWidget({ title, initialData }: GraphWidgetProps) {
             </SheetHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="timeRange" className="text-right">
-                  Time Range
-                </Label>
+                <Label className="text-right">Input Source</Label>
+                <Select value={selectedSource} onValueChange={handleSourceChange}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select input source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="primary">Primary Sensor</SelectItem>
+                    <SelectItem value="secondary">Secondary Sensor</SelectItem>
+                    <SelectItem value="backup">Backup Sensor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Time Range</Label>
                 <Select value={timeRange} onValueChange={handleTimeRangeChange}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select time range" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1m">1 minute</SelectItem>
-                    <SelectItem value="5m">5 minutes</SelectItem>
-                    <SelectItem value="10m">10 minutes</SelectItem>
-                    <SelectItem value="15m">15 minutes</SelectItem>
-                    <SelectItem value="1h">1 hour</SelectItem>
-                    <SelectItem value="6h">6 hours</SelectItem>
-                    <SelectItem value="12h">12 hours</SelectItem>
-                    <SelectItem value="24h">24 hours</SelectItem>
+                    <SelectItem value="1h">1 hour (1min avg)</SelectItem>
+                    <SelectItem value="6h">6 hours (5min avg)</SelectItem>
+                    <SelectItem value="24h">24 hours (15min avg)</SelectItem>
+                    <SelectItem value="7d">7 days (1h avg)</SelectItem>
+                    <SelectItem value="14d">14 days (2h avg)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="sourcePin" className="text-right">
-                  Source Pin
-                </Label>
-                <Input
-                  id="sourcePin"
-                  value={sourcePin}
-                  onChange={(e) => {
-                    setSourcePin(e.target.value)
-                    handleSettingChange()
-                  }}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="dataType" className="text-right">
-                  Data Type
-                </Label>
-                <Select 
-                  value={dataType} 
-                  onValueChange={(value) => {
-                    setDataType(value)
-                    handleSettingChange()
-                  }}
-                >
+                <Label className="text-right">Refresh Every</Label>
+                <Select value={pollingInterval} onValueChange={handlePollingChange}>
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select data type" />
+                    <SelectValue placeholder="Select refresh interval" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="analog">Analog</SelectItem>
-                    <SelectItem value="digital">Digital</SelectItem>
+                    <SelectItem value="10s">10 seconds</SelectItem>
+                    <SelectItem value="30s">30 seconds</SelectItem>
+                    <SelectItem value="1m">1 minute</SelectItem>
+                    <SelectItem value="5m">5 minutes</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            {/* <JsonEditor initialData={data} onUpdate={handleDataUpdate} /> */}
             <SheetClose asChild>
               <Button onClick={handleRefresh} className="mt-4">
                 <RefreshCw className="mr-2 h-4 w-4" />
@@ -147,19 +167,34 @@ export default function GraphWidget({ title, initialData }: GraphWidgetProps) {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="h-[200px]">
+      <div className="h-[200px] relative">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="value" stroke="#8884d8" />
+            <XAxis
+              dataKey="index"
+              type="number"
+              domain={[0, 'dataMax']}
+              tickFormatter={formatXAxisTick}
+              interval={timeRange === '1h' ? 4 : timeRange === '6h' ? 5 : timeRange === '24h' ? 7 : 13}
+            />
+            <YAxis domain={getYAxisDomain()} />
+            <Tooltip
+              labelFormatter={formatTooltipTime}
+              formatter={(value: number) => [value.toFixed(2), title]}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#8884d8"
+              isAnimationActive={false}
+              dot={false}
+            />
           </LineChart>
         </ResponsiveContainer>
-        {isRefreshing && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70">
-            <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
+        {isSettingsChanged && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
       </div>

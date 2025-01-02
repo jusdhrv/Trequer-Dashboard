@@ -1,0 +1,1452 @@
+{
+  "readings": [
+    {
+      "temperature": 22.01,
+      "humidity": 44.9,
+      "methane": 2.03,
+      "light": 800.26,
+      "atmosphericPressure": 1013.08,
+      "timestamp": "2025-01-02T19:10:30.492Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 44.64,
+      "methane": 1.95,
+      "light": 795.14,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:10:31.679Z"
+    },
+    {
+      "temperature": 21.96,
+      "humidity": 44.91,
+      "methane": 1.98,
+      "light": 799.77,
+      "atmosphericPressure": 1013.2,
+      "timestamp": "2025-01-02T19:10:32.733Z"
+    },
+    {
+      "temperature": 21.97,
+      "humidity": 44.98,
+      "methane": 2.03,
+      "light": 802.37,
+      "atmosphericPressure": 1013.14,
+      "timestamp": "2025-01-02T19:10:33.786Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 44.81,
+      "methane": 2.01,
+      "light": 809.6,
+      "atmosphericPressure": 1013.41,
+      "timestamp": "2025-01-02T19:10:34.837Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 44.92,
+      "methane": 1.97,
+      "light": 807.02,
+      "atmosphericPressure": 1013.22,
+      "timestamp": "2025-01-02T19:10:35.879Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 45.02,
+      "methane": 2,
+      "light": 797.04,
+      "atmosphericPressure": 1013.3,
+      "timestamp": "2025-01-02T19:10:36.917Z"
+    },
+    {
+      "temperature": 21.96,
+      "humidity": 44.91,
+      "methane": 2,
+      "light": 797.96,
+      "atmosphericPressure": 1013.22,
+      "timestamp": "2025-01-02T19:10:37.958Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 44.82,
+      "methane": 2.01,
+      "light": 793.34,
+      "atmosphericPressure": 1013.17,
+      "timestamp": "2025-01-02T19:10:39.033Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.25,
+      "methane": 2.05,
+      "light": 805.91,
+      "atmosphericPressure": 1013.48,
+      "timestamp": "2025-01-02T19:10:40.068Z"
+    },
+    {
+      "temperature": 21.96,
+      "humidity": 45.21,
+      "methane": 2.03,
+      "light": 805.44,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:10:41.118Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 45.19,
+      "methane": 1.99,
+      "light": 803.14,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:10:42.162Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 44.88,
+      "methane": 1.94,
+      "light": 795.28,
+      "atmosphericPressure": 1013.18,
+      "timestamp": "2025-01-02T19:10:43.197Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.02,
+      "methane": 2.01,
+      "light": 807.36,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:10:44.229Z"
+    },
+    {
+      "temperature": 22.02,
+      "humidity": 45.05,
+      "methane": 1.97,
+      "light": 806.75,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:10:45.253Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 45.1,
+      "methane": 2.01,
+      "light": 792.09,
+      "atmosphericPressure": 1013.27,
+      "timestamp": "2025-01-02T19:10:46.279Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.14,
+      "methane": 2,
+      "light": 804.99,
+      "atmosphericPressure": 1013.05,
+      "timestamp": "2025-01-02T19:10:47.303Z"
+    },
+    {
+      "temperature": 21.99,
+      "humidity": 45.08,
+      "methane": 1.98,
+      "light": 809.15,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:10:48.341Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 44.72,
+      "methane": 1.99,
+      "light": 790.31,
+      "atmosphericPressure": 1013.18,
+      "timestamp": "2025-01-02T19:10:49.372Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 44.96,
+      "methane": 1.96,
+      "light": 807.99,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:10:50.399Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.45,
+      "methane": 1.99,
+      "light": 802.34,
+      "atmosphericPressure": 1013.27,
+      "timestamp": "2025-01-02T19:10:51.430Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 44.72,
+      "methane": 2.01,
+      "light": 796.76,
+      "atmosphericPressure": 1013.41,
+      "timestamp": "2025-01-02T19:10:52.462Z"
+    },
+    {
+      "temperature": 22,
+      "humidity": 45.02,
+      "methane": 1.99,
+      "light": 800.66,
+      "atmosphericPressure": 1013.48,
+      "timestamp": "2025-01-02T19:10:53.486Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.3,
+      "methane": 2,
+      "light": 802,
+      "atmosphericPressure": 1013.2,
+      "timestamp": "2025-01-02T19:10:54.517Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 44.94,
+      "methane": 2,
+      "light": 805.42,
+      "atmosphericPressure": 1013.24,
+      "timestamp": "2025-01-02T19:10:55.599Z"
+    },
+    {
+      "temperature": 21.94,
+      "humidity": 45.1,
+      "methane": 1.98,
+      "light": 799.69,
+      "atmosphericPressure": 1013.26,
+      "timestamp": "2025-01-02T19:10:56.698Z"
+    },
+    {
+      "temperature": 22,
+      "humidity": 44.9,
+      "methane": 2.02,
+      "light": 812.92,
+      "atmosphericPressure": 1013.23,
+      "timestamp": "2025-01-02T19:10:58.224Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.01,
+      "methane": 2.01,
+      "light": 803.14,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:10:59.809Z"
+    },
+    {
+      "temperature": 21.95,
+      "humidity": 44.96,
+      "methane": 1.98,
+      "light": 806.8,
+      "atmosphericPressure": 1013.15,
+      "timestamp": "2025-01-02T19:11:01.524Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 44.72,
+      "methane": 2,
+      "light": 801.26,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:11:03.519Z"
+    },
+    {
+      "temperature": 21.97,
+      "humidity": 45.11,
+      "methane": 2,
+      "light": 802.13,
+      "atmosphericPressure": 1013.19,
+      "timestamp": "2025-01-02T19:11:07.653Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 44.83,
+      "methane": 1.98,
+      "light": 812.24,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:11:13.733Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 44.66,
+      "methane": 1.97,
+      "light": 803.07,
+      "atmosphericPressure": 1013.3,
+      "timestamp": "2025-01-02T19:11:15.250Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 44.98,
+      "methane": 2.02,
+      "light": 803.05,
+      "atmosphericPressure": 1013.21,
+      "timestamp": "2025-01-02T19:11:17.101Z"
+    },
+    {
+      "temperature": 22,
+      "humidity": 44.94,
+      "methane": 1.99,
+      "light": 797.27,
+      "atmosphericPressure": 1013.41,
+      "timestamp": "2025-01-02T19:11:21.141Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 44.73,
+      "methane": 2,
+      "light": 811.62,
+      "atmosphericPressure": 1013.23,
+      "timestamp": "2025-01-02T19:11:22.826Z"
+    },
+    {
+      "temperature": 22.02,
+      "humidity": 45.33,
+      "methane": 2.03,
+      "light": 802.09,
+      "atmosphericPressure": 1013.05,
+      "timestamp": "2025-01-02T19:11:24.510Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 44.93,
+      "methane": 2.02,
+      "light": 804.05,
+      "atmosphericPressure": 1013.23,
+      "timestamp": "2025-01-02T19:11:26.121Z"
+    },
+    {
+      "temperature": 22,
+      "humidity": 45.21,
+      "methane": 2.01,
+      "light": 802.96,
+      "atmosphericPressure": 1013.43,
+      "timestamp": "2025-01-02T19:11:29.682Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 44.94,
+      "methane": 2,
+      "light": 802.47,
+      "atmosphericPressure": 1013.33,
+      "timestamp": "2025-01-02T19:11:32.700Z"
+    },
+    {
+      "temperature": 21.98,
+      "humidity": 45.34,
+      "methane": 2.02,
+      "light": 804.19,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:11:33.876Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 44.74,
+      "methane": 2.02,
+      "light": 802.35,
+      "atmosphericPressure": 1013.25,
+      "timestamp": "2025-01-02T19:11:35.486Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 45,
+      "methane": 2,
+      "light": 801.02,
+      "atmosphericPressure": 1013.43,
+      "timestamp": "2025-01-02T19:11:37.203Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.09,
+      "methane": 2.02,
+      "light": 792.55,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:11:38.830Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.23,
+      "methane": 1.98,
+      "light": 798.69,
+      "atmosphericPressure": 1013.42,
+      "timestamp": "2025-01-02T19:11:41.168Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 44.75,
+      "methane": 1.98,
+      "light": 799.41,
+      "atmosphericPressure": 1013.24,
+      "timestamp": "2025-01-02T19:11:42.771Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 44.68,
+      "methane": 2.02,
+      "light": 801.83,
+      "atmosphericPressure": 1013.22,
+      "timestamp": "2025-01-02T19:11:43.886Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.47,
+      "methane": 1.99,
+      "light": 793.33,
+      "atmosphericPressure": 1013.4,
+      "timestamp": "2025-01-02T19:11:44.942Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.12,
+      "methane": 2.04,
+      "light": 790.87,
+      "atmosphericPressure": 1013.46,
+      "timestamp": "2025-01-02T19:11:46.090Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.24,
+      "methane": 2,
+      "light": 800.4,
+      "atmosphericPressure": 1013.2,
+      "timestamp": "2025-01-02T19:11:47.281Z"
+    },
+    {
+      "temperature": 21.99,
+      "humidity": 45.59,
+      "methane": 2,
+      "light": 801.52,
+      "atmosphericPressure": 1013.33,
+      "timestamp": "2025-01-02T19:11:48.539Z"
+    },
+    {
+      "temperature": 22.15,
+      "humidity": 45.59,
+      "methane": 2,
+      "light": 805.76,
+      "atmosphericPressure": 1013.11,
+      "timestamp": "2025-01-02T19:11:50.343Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.16,
+      "methane": 2.02,
+      "light": 799.79,
+      "atmosphericPressure": 1013.28,
+      "timestamp": "2025-01-02T19:11:51.552Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.3,
+      "methane": 2,
+      "light": 813.28,
+      "atmosphericPressure": 1013.3,
+      "timestamp": "2025-01-02T19:11:52.721Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.19,
+      "methane": 2.02,
+      "light": 810.94,
+      "atmosphericPressure": 1013.19,
+      "timestamp": "2025-01-02T19:11:54.004Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.03,
+      "methane": 2,
+      "light": 809.53,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:11:56.898Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.29,
+      "methane": 2.01,
+      "light": 796.96,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:11:58.005Z"
+    },
+    {
+      "temperature": 21.95,
+      "humidity": 45.26,
+      "methane": 1.97,
+      "light": 803.21,
+      "atmosphericPressure": 1013.18,
+      "timestamp": "2025-01-02T19:12:00.458Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.24,
+      "methane": 2,
+      "light": 804.27,
+      "atmosphericPressure": 1013.33,
+      "timestamp": "2025-01-02T19:12:02.268Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 44.98,
+      "methane": 1.99,
+      "light": 796.6,
+      "atmosphericPressure": 1013.2,
+      "timestamp": "2025-01-02T19:12:04.409Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.12,
+      "methane": 2.01,
+      "light": 799.87,
+      "atmosphericPressure": 1013.14,
+      "timestamp": "2025-01-02T19:12:23.444Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 45.13,
+      "methane": 2.02,
+      "light": 804.86,
+      "atmosphericPressure": 1013.17,
+      "timestamp": "2025-01-02T19:12:27.112Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.2,
+      "methane": 1.98,
+      "light": 803.9,
+      "atmosphericPressure": 1013.09,
+      "timestamp": "2025-01-02T19:12:28.325Z"
+    },
+    {
+      "temperature": 21.95,
+      "humidity": 44.97,
+      "methane": 1.99,
+      "light": 807.97,
+      "atmosphericPressure": 1013.45,
+      "timestamp": "2025-01-02T19:12:29.947Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.11,
+      "methane": 2,
+      "light": 805.84,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:12:32.738Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.12,
+      "methane": 2.01,
+      "light": 804.53,
+      "atmosphericPressure": 1013.22,
+      "timestamp": "2025-01-02T19:12:34.410Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 45.32,
+      "methane": 2,
+      "light": 807.12,
+      "atmosphericPressure": 1013.28,
+      "timestamp": "2025-01-02T19:12:37.165Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.26,
+      "methane": 2.02,
+      "light": 807.72,
+      "atmosphericPressure": 1013.23,
+      "timestamp": "2025-01-02T19:12:38.263Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.42,
+      "methane": 2.02,
+      "light": 801.57,
+      "atmosphericPressure": 1013.18,
+      "timestamp": "2025-01-02T19:12:39.410Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 45.19,
+      "methane": 2.05,
+      "light": 805.53,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:12:40.620Z"
+    },
+    {
+      "temperature": 22,
+      "humidity": 45.42,
+      "methane": 2.02,
+      "light": 802.23,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:12:42.607Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.12,
+      "methane": 2.02,
+      "light": 799.71,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:12:44.146Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 44.95,
+      "methane": 2.01,
+      "light": 801.99,
+      "atmosphericPressure": 1013.21,
+      "timestamp": "2025-01-02T19:12:45.339Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.33,
+      "methane": 1.97,
+      "light": 802.95,
+      "atmosphericPressure": 1013.24,
+      "timestamp": "2025-01-02T19:12:46.412Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.13,
+      "methane": 2.04,
+      "light": 807.44,
+      "atmosphericPressure": 1013.47,
+      "timestamp": "2025-01-02T19:12:47.557Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.15,
+      "methane": 1.99,
+      "light": 808.46,
+      "atmosphericPressure": 1013.17,
+      "timestamp": "2025-01-02T19:12:48.667Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.51,
+      "methane": 2.01,
+      "light": 799.79,
+      "atmosphericPressure": 1013.24,
+      "timestamp": "2025-01-02T19:12:49.793Z"
+    },
+    {
+      "temperature": 22.13,
+      "humidity": 45.22,
+      "methane": 1.98,
+      "light": 809.76,
+      "atmosphericPressure": 1013.18,
+      "timestamp": "2025-01-02T19:12:50.966Z"
+    },
+    {
+      "temperature": 22.15,
+      "humidity": 45.01,
+      "methane": 2.03,
+      "light": 812.53,
+      "atmosphericPressure": 1013.37,
+      "timestamp": "2025-01-02T19:12:52.166Z"
+    },
+    {
+      "temperature": 21.93,
+      "humidity": 45.36,
+      "methane": 2,
+      "light": 807.46,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:12:53.346Z"
+    },
+    {
+      "temperature": 22.02,
+      "humidity": 45.16,
+      "methane": 2,
+      "light": 803.88,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:12:54.466Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.23,
+      "methane": 2.01,
+      "light": 819.09,
+      "atmosphericPressure": 1013.25,
+      "timestamp": "2025-01-02T19:12:55.549Z"
+    },
+    {
+      "temperature": 22.15,
+      "humidity": 45.11,
+      "methane": 2.02,
+      "light": 795.63,
+      "atmosphericPressure": 1013.32,
+      "timestamp": "2025-01-02T19:12:56.620Z"
+    },
+    {
+      "temperature": 22,
+      "humidity": 45.29,
+      "methane": 2.03,
+      "light": 793.86,
+      "atmosphericPressure": 1013.4,
+      "timestamp": "2025-01-02T19:12:57.723Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.13,
+      "methane": 1.99,
+      "light": 800.31,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:12:58.908Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 44.96,
+      "methane": 2.02,
+      "light": 809.47,
+      "atmosphericPressure": 1013.16,
+      "timestamp": "2025-01-02T19:13:00.065Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.2,
+      "methane": 2.02,
+      "light": 798.74,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:13:01.353Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.14,
+      "methane": 2,
+      "light": 809.44,
+      "atmosphericPressure": 1013.24,
+      "timestamp": "2025-01-02T19:13:02.806Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 45.33,
+      "methane": 2,
+      "light": 803.88,
+      "atmosphericPressure": 1013.38,
+      "timestamp": "2025-01-02T19:13:04.061Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.46,
+      "methane": 2,
+      "light": 809.06,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:13:05.638Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.34,
+      "methane": 2.01,
+      "light": 807.54,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:13:06.827Z"
+    },
+    {
+      "temperature": 22.12,
+      "humidity": 45.55,
+      "methane": 2,
+      "light": 805.59,
+      "atmosphericPressure": 1013.42,
+      "timestamp": "2025-01-02T19:13:08.289Z"
+    },
+    {
+      "temperature": 21.99,
+      "humidity": 45.06,
+      "methane": 2.06,
+      "light": 800.31,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:13:09.388Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 45.37,
+      "methane": 2.03,
+      "light": 806.52,
+      "atmosphericPressure": 1013.21,
+      "timestamp": "2025-01-02T19:13:13.421Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.54,
+      "methane": 2.01,
+      "light": 813.34,
+      "atmosphericPressure": 1013.33,
+      "timestamp": "2025-01-02T19:13:15.240Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.46,
+      "methane": 2.03,
+      "light": 808.72,
+      "atmosphericPressure": 1013.4,
+      "timestamp": "2025-01-02T19:13:16.376Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.29,
+      "methane": 2.04,
+      "light": 811.77,
+      "atmosphericPressure": 1013.22,
+      "timestamp": "2025-01-02T19:13:17.538Z"
+    },
+    {
+      "temperature": 22.12,
+      "humidity": 45.02,
+      "methane": 2,
+      "light": 807.12,
+      "atmosphericPressure": 1013.18,
+      "timestamp": "2025-01-02T19:13:18.628Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.05,
+      "methane": 2.02,
+      "light": 802.65,
+      "atmosphericPressure": 1013.37,
+      "timestamp": "2025-01-02T19:13:19.701Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 44.83,
+      "methane": 2.01,
+      "light": 805.65,
+      "atmosphericPressure": 1013.42,
+      "timestamp": "2025-01-02T19:13:20.855Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.07,
+      "methane": 1.99,
+      "light": 803.64,
+      "atmosphericPressure": 1013.26,
+      "timestamp": "2025-01-02T19:13:22.570Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.47,
+      "methane": 2.01,
+      "light": 807.47,
+      "atmosphericPressure": 1013.26,
+      "timestamp": "2025-01-02T19:13:34.243Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 45.39,
+      "methane": 2,
+      "light": 808.6,
+      "atmosphericPressure": 1013.14,
+      "timestamp": "2025-01-02T19:13:36.672Z"
+    },
+    {
+      "temperature": 22.16,
+      "humidity": 45.09,
+      "methane": 2.02,
+      "light": 806.56,
+      "atmosphericPressure": 1013.28,
+      "timestamp": "2025-01-02T19:13:39.538Z"
+    },
+    {
+      "temperature": 21.92,
+      "humidity": 45.05,
+      "methane": 2.01,
+      "light": 818.73,
+      "atmosphericPressure": 1013.44,
+      "timestamp": "2025-01-02T19:13:42.740Z"
+    },
+    {
+      "temperature": 22.02,
+      "humidity": 45.22,
+      "methane": 1.99,
+      "light": 793.86,
+      "atmosphericPressure": 1013.28,
+      "timestamp": "2025-01-02T19:13:44.078Z"
+    },
+    {
+      "temperature": 22.21,
+      "humidity": 45.3,
+      "methane": 2.01,
+      "light": 802.66,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:13:48.394Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.27,
+      "methane": 2.03,
+      "light": 806.3,
+      "atmosphericPressure": 1013.43,
+      "timestamp": "2025-01-02T19:14:23.837Z"
+    },
+    {
+      "temperature": 22.18,
+      "humidity": 45.23,
+      "methane": 1.99,
+      "light": 801.35,
+      "atmosphericPressure": 1013.26,
+      "timestamp": "2025-01-02T19:14:28.180Z"
+    },
+    {
+      "temperature": 22.13,
+      "humidity": 45.38,
+      "methane": 2,
+      "light": 800.23,
+      "atmosphericPressure": 1013.14,
+      "timestamp": "2025-01-02T19:14:30.466Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.3,
+      "methane": 1.99,
+      "light": 812.39,
+      "atmosphericPressure": 1013.33,
+      "timestamp": "2025-01-02T19:14:32.677Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.47,
+      "methane": 2.03,
+      "light": 805.17,
+      "atmosphericPressure": 1013.25,
+      "timestamp": "2025-01-02T19:14:43.098Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.51,
+      "methane": 2,
+      "light": 804.85,
+      "atmosphericPressure": 1013.49,
+      "timestamp": "2025-01-02T19:14:45.100Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.5,
+      "methane": 2.03,
+      "light": 807.01,
+      "atmosphericPressure": 1013.41,
+      "timestamp": "2025-01-02T19:15:09.258Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.08,
+      "methane": 2.02,
+      "light": 807.76,
+      "atmosphericPressure": 1013.45,
+      "timestamp": "2025-01-02T19:15:10.646Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.12,
+      "methane": 2.03,
+      "light": 816.67,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:15:11.767Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.08,
+      "methane": 2.02,
+      "light": 809.21,
+      "atmosphericPressure": 1013.42,
+      "timestamp": "2025-01-02T19:15:13.155Z"
+    },
+    {
+      "temperature": 22.12,
+      "humidity": 45.3,
+      "methane": 2.02,
+      "light": 806.81,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:15:14.423Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.11,
+      "methane": 2.06,
+      "light": 816.22,
+      "atmosphericPressure": 1013.49,
+      "timestamp": "2025-01-02T19:15:15.625Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.48,
+      "methane": 2.04,
+      "light": 822.44,
+      "atmosphericPressure": 1013.62,
+      "timestamp": "2025-01-02T19:15:16.754Z"
+    },
+    {
+      "temperature": 22.2,
+      "humidity": 45.37,
+      "methane": 2.06,
+      "light": 819.53,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:15:18.072Z"
+    },
+    {
+      "temperature": 22.12,
+      "humidity": 44.82,
+      "methane": 2.03,
+      "light": 815.18,
+      "atmosphericPressure": 1013.38,
+      "timestamp": "2025-01-02T19:15:19.194Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.42,
+      "methane": 2.03,
+      "light": 815.79,
+      "atmosphericPressure": 1013.23,
+      "timestamp": "2025-01-02T19:15:20.308Z"
+    },
+    {
+      "temperature": 22.2,
+      "humidity": 45.43,
+      "methane": 2.02,
+      "light": 811.76,
+      "atmosphericPressure": 1013.4,
+      "timestamp": "2025-01-02T19:15:21.582Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.27,
+      "methane": 2.02,
+      "light": 806.26,
+      "atmosphericPressure": 1013.3,
+      "timestamp": "2025-01-02T19:15:23.176Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.71,
+      "methane": 2.05,
+      "light": 806.79,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:15:24.502Z"
+    },
+    {
+      "temperature": 22.16,
+      "humidity": 45.34,
+      "methane": 1.99,
+      "light": 812.98,
+      "atmosphericPressure": 1013.3,
+      "timestamp": "2025-01-02T19:15:25.886Z"
+    },
+    {
+      "temperature": 22.04,
+      "humidity": 45.21,
+      "methane": 1.98,
+      "light": 808.73,
+      "atmosphericPressure": 1013.37,
+      "timestamp": "2025-01-02T19:15:27.248Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.25,
+      "methane": 2.02,
+      "light": 809.74,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:15:29.339Z"
+    },
+    {
+      "temperature": 22.17,
+      "humidity": 45.32,
+      "methane": 2.02,
+      "light": 819.66,
+      "atmosphericPressure": 1013.37,
+      "timestamp": "2025-01-02T19:15:31.529Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.15,
+      "methane": 2.05,
+      "light": 804.6,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:15:32.629Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.13,
+      "methane": 2.02,
+      "light": 814.24,
+      "atmosphericPressure": 1013.25,
+      "timestamp": "2025-01-02T19:15:33.765Z"
+    },
+    {
+      "temperature": 21.98,
+      "humidity": 45.36,
+      "methane": 2.03,
+      "light": 804.13,
+      "atmosphericPressure": 1013.32,
+      "timestamp": "2025-01-02T19:15:34.927Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.71,
+      "methane": 2.02,
+      "light": 821.13,
+      "atmosphericPressure": 1013.49,
+      "timestamp": "2025-01-02T19:15:36.156Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.49,
+      "methane": 1.99,
+      "light": 796.87,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:15:37.278Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.17,
+      "methane": 2.02,
+      "light": 809.35,
+      "atmosphericPressure": 1013.6,
+      "timestamp": "2025-01-02T19:15:38.350Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.31,
+      "methane": 2,
+      "light": 809.84,
+      "atmosphericPressure": 1013.46,
+      "timestamp": "2025-01-02T19:15:39.454Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 45.28,
+      "methane": 2.02,
+      "light": 819.86,
+      "atmosphericPressure": 1013.45,
+      "timestamp": "2025-01-02T19:15:40.538Z"
+    },
+    {
+      "temperature": 22.17,
+      "humidity": 45.35,
+      "methane": 2.02,
+      "light": 808.45,
+      "atmosphericPressure": 1013.47,
+      "timestamp": "2025-01-02T19:15:41.664Z"
+    },
+    {
+      "temperature": 22.15,
+      "humidity": 45.34,
+      "methane": 2.01,
+      "light": 826.51,
+      "atmosphericPressure": 1013.26,
+      "timestamp": "2025-01-02T19:15:42.752Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.52,
+      "methane": 2.04,
+      "light": 815.89,
+      "atmosphericPressure": 1013.36,
+      "timestamp": "2025-01-02T19:15:43.854Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 45.31,
+      "methane": 2.01,
+      "light": 809.53,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:15:45.026Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.28,
+      "methane": 1.98,
+      "light": 818.09,
+      "atmosphericPressure": 1013.21,
+      "timestamp": "2025-01-02T19:15:46.101Z"
+    },
+    {
+      "temperature": 22.13,
+      "humidity": 45.14,
+      "methane": 2.02,
+      "light": 810.03,
+      "atmosphericPressure": 1013.44,
+      "timestamp": "2025-01-02T19:15:47.458Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.35,
+      "methane": 2.03,
+      "light": 816.57,
+      "atmosphericPressure": 1013.6,
+      "timestamp": "2025-01-02T19:15:48.625Z"
+    },
+    {
+      "temperature": 22.15,
+      "humidity": 45.21,
+      "methane": 2,
+      "light": 811.2,
+      "atmosphericPressure": 1013.42,
+      "timestamp": "2025-01-02T19:15:49.681Z"
+    },
+    {
+      "temperature": 22.28,
+      "humidity": 45.31,
+      "methane": 2,
+      "light": 808.15,
+      "atmosphericPressure": 1013.2,
+      "timestamp": "2025-01-02T19:15:50.726Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.69,
+      "methane": 2.06,
+      "light": 818.78,
+      "atmosphericPressure": 1013.37,
+      "timestamp": "2025-01-02T19:15:51.773Z"
+    },
+    {
+      "temperature": 22.12,
+      "humidity": 45.45,
+      "methane": 2.02,
+      "light": 820.62,
+      "atmosphericPressure": 1013.45,
+      "timestamp": "2025-01-02T19:15:52.809Z"
+    },
+    {
+      "temperature": 22.09,
+      "humidity": 45.1,
+      "methane": 2.04,
+      "light": 813.28,
+      "atmosphericPressure": 1013.51,
+      "timestamp": "2025-01-02T19:15:53.851Z"
+    },
+    {
+      "temperature": 22.17,
+      "humidity": 45.62,
+      "methane": 1.98,
+      "light": 814.71,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:15:54.886Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 45.53,
+      "methane": 2,
+      "light": 812.91,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:15:55.923Z"
+    },
+    {
+      "temperature": 22.24,
+      "humidity": 45.32,
+      "methane": 2.01,
+      "light": 811.62,
+      "atmosphericPressure": 1013.23,
+      "timestamp": "2025-01-02T19:15:56.956Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.39,
+      "methane": 2.03,
+      "light": 802.59,
+      "atmosphericPressure": 1013.16,
+      "timestamp": "2025-01-02T19:15:57.985Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.35,
+      "methane": 2.02,
+      "light": 807.18,
+      "atmosphericPressure": 1013.26,
+      "timestamp": "2025-01-02T19:15:59.014Z"
+    },
+    {
+      "temperature": 22.16,
+      "humidity": 45.3,
+      "methane": 2.04,
+      "light": 813.54,
+      "atmosphericPressure": 1013.45,
+      "timestamp": "2025-01-02T19:16:00.048Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 45.23,
+      "methane": 2,
+      "light": 829.7,
+      "atmosphericPressure": 1013.32,
+      "timestamp": "2025-01-02T19:16:01.187Z"
+    },
+    {
+      "temperature": 22.16,
+      "humidity": 45.83,
+      "methane": 2.05,
+      "light": 824.81,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:16:02.220Z"
+    },
+    {
+      "temperature": 22.05,
+      "humidity": 45.25,
+      "methane": 2.05,
+      "light": 818.93,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:16:03.261Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.52,
+      "methane": 2.03,
+      "light": 811.33,
+      "atmosphericPressure": 1013.23,
+      "timestamp": "2025-01-02T19:16:04.305Z"
+    },
+    {
+      "temperature": 22.16,
+      "humidity": 45.18,
+      "methane": 2.03,
+      "light": 815.76,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:16:05.357Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 45.46,
+      "methane": 2.05,
+      "light": 812.7,
+      "atmosphericPressure": 1013.37,
+      "timestamp": "2025-01-02T19:16:06.412Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.62,
+      "methane": 1.99,
+      "light": 810.26,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:16:07.461Z"
+    },
+    {
+      "temperature": 22.14,
+      "humidity": 45.17,
+      "methane": 2.03,
+      "light": 810.62,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:16:08.522Z"
+    },
+    {
+      "temperature": 22.07,
+      "humidity": 44.96,
+      "methane": 2,
+      "light": 808.39,
+      "atmosphericPressure": 1013.45,
+      "timestamp": "2025-01-02T19:16:09.578Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 45.59,
+      "methane": 2.01,
+      "light": 815.32,
+      "atmosphericPressure": 1013.15,
+      "timestamp": "2025-01-02T19:16:10.617Z"
+    },
+    {
+      "temperature": 22.13,
+      "humidity": 45.21,
+      "methane": 2,
+      "light": 812.1,
+      "atmosphericPressure": 1013.37,
+      "timestamp": "2025-01-02T19:16:11.650Z"
+    },
+    {
+      "temperature": 22.16,
+      "humidity": 45.6,
+      "methane": 2.01,
+      "light": 815.27,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:16:12.680Z"
+    },
+    {
+      "temperature": 22.17,
+      "humidity": 45.17,
+      "methane": 2.02,
+      "light": 812.74,
+      "atmosphericPressure": 1013.4,
+      "timestamp": "2025-01-02T19:16:13.713Z"
+    },
+    {
+      "temperature": 22.12,
+      "humidity": 45.25,
+      "methane": 2.02,
+      "light": 802.35,
+      "atmosphericPressure": 1013.47,
+      "timestamp": "2025-01-02T19:16:14.750Z"
+    },
+    {
+      "temperature": 22.18,
+      "humidity": 45.82,
+      "methane": 2.05,
+      "light": 805.84,
+      "atmosphericPressure": 1013.31,
+      "timestamp": "2025-01-02T19:16:15.798Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.5,
+      "methane": 2.01,
+      "light": 812.57,
+      "atmosphericPressure": 1013.35,
+      "timestamp": "2025-01-02T19:16:16.844Z"
+    },
+    {
+      "temperature": 22.01,
+      "humidity": 45.24,
+      "methane": 2.02,
+      "light": 810.4,
+      "atmosphericPressure": 1013.25,
+      "timestamp": "2025-01-02T19:16:17.889Z"
+    },
+    {
+      "temperature": 22.08,
+      "humidity": 45.65,
+      "methane": 2,
+      "light": 818.04,
+      "atmosphericPressure": 1013.5,
+      "timestamp": "2025-01-02T19:16:18.919Z"
+    },
+    {
+      "temperature": 22.11,
+      "humidity": 45.46,
+      "methane": 2.08,
+      "light": 805.02,
+      "atmosphericPressure": 1013.34,
+      "timestamp": "2025-01-02T19:16:19.950Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 45.56,
+      "methane": 2.04,
+      "light": 812.11,
+      "atmosphericPressure": 1013.25,
+      "timestamp": "2025-01-02T19:16:20.978Z"
+    },
+    {
+      "temperature": 22.06,
+      "humidity": 45.54,
+      "methane": 2,
+      "light": 819.6,
+      "atmosphericPressure": 1013.27,
+      "timestamp": "2025-01-02T19:16:22.015Z"
+    },
+    {
+      "temperature": 22.12,
+      "humidity": 45.47,
+      "methane": 1.97,
+      "light": 809.86,
+      "atmosphericPressure": 1013.55,
+      "timestamp": "2025-01-02T19:16:23.045Z"
+    },
+    {
+      "temperature": 22.03,
+      "humidity": 45.54,
+      "methane": 2.02,
+      "light": 815.2,
+      "atmosphericPressure": 1013.4,
+      "timestamp": "2025-01-02T19:16:24.083Z"
+    },
+    {
+      "temperature": 22.15,
+      "humidity": 45.49,
+      "methane": 2.02,
+      "light": 810.55,
+      "atmosphericPressure": 1013.29,
+      "timestamp": "2025-01-02T19:16:25.161Z"
+    },
+    {
+      "temperature": 22.1,
+      "humidity": 45.36,
+      "methane": 2.03,
+      "light": 819.1,
+      "atmosphericPressure": 1013.3,
+      "timestamp": "2025-01-02T19:16:26.256Z"
+    }
+  ]
+}
