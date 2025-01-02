@@ -37,6 +37,22 @@ export function processReadings(
     let intervalSize: number // in milliseconds
 
     switch (timeRange) {
+        case '1min':
+            intervalCount = 60 // 1-second intervals for 1 minute
+            intervalSize = 1000 // 1 second
+            break
+        case '5min':
+            intervalCount = 60 // 5-second intervals for 5 minutes
+            intervalSize = 5 * 1000 // 5 seconds
+            break
+        case '15min':
+            intervalCount = 60 // 15-second intervals for 15 minutes
+            intervalSize = 15 * 1000 // 15 seconds
+            break
+        case '30min':
+            intervalCount = 60 // 30-second intervals for 30 minutes
+            intervalSize = 30 * 1000 // 30 seconds
+            break
         case '1h':
             intervalCount = 60 // 1-minute intervals for 1 hour
             intervalSize = 60 * 1000 // 1 minute

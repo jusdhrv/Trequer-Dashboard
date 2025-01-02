@@ -85,6 +85,14 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
 
   const formatXAxisTick = (index: number) => {
     switch (timeRange) {
+      case '1min':
+        return `${index}s`
+      case '5min':
+        return `${index * 5}s`
+      case '15min':
+        return `${index * 15}s`
+      case '30min':
+        return `${index * 30}s`
       case '1h':
         return `${index}min`
       case '6h':
@@ -135,11 +143,15 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
                     <SelectValue placeholder="Select time range" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1h">1 hour (1min avg)</SelectItem>
-                    <SelectItem value="6h">6 hours (5min avg)</SelectItem>
-                    <SelectItem value="24h">24 hours (15min avg)</SelectItem>
-                    <SelectItem value="7d">7 days (1h avg)</SelectItem>
-                    <SelectItem value="14d">14 days (2h avg)</SelectItem>
+                    <SelectItem value="1min">1 minute</SelectItem>
+                    <SelectItem value="5min">5 minutes</SelectItem>
+                    <SelectItem value="15min">15 minutes</SelectItem>
+                    <SelectItem value="30min">30 minutes</SelectItem>
+                    <SelectItem value="1h">1 hour</SelectItem>
+                    <SelectItem value="6h">6 hours</SelectItem>
+                    <SelectItem value="24h">24 hours</SelectItem>
+                    <SelectItem value="7d">7 days</SelectItem>
+                    <SelectItem value="14d">14 days</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
