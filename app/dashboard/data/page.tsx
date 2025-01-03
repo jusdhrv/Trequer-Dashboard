@@ -10,10 +10,11 @@ import { DateTimeRangePicker } from "../../../components/ui/date-time-range-pick
 import { format, addSeconds, differenceInSeconds } from "date-fns"
 
 const sensors = [
-  { id: 'temp', name: 'Temperature' },
-  { id: 'pressure', name: 'Pressure' },
-  { id: 'radiation', name: 'Radiation' },
-  { id: 'solarWind', name: 'Solar Wind Speed' },
+  { id: 'temperature', name: 'Temperature (°C)' },
+  { id: 'humidity', name: 'Humidity (%)' },
+  { id: 'methane', name: 'Methane (PPM)' },
+  { id: 'light', name: 'Light (Lux)' },
+  { id: 'atmosphericPressure', name: 'Atmospheric Pressure (hPa)' },
 ]
 
 const timeScales = [
@@ -30,43 +31,72 @@ const RawDataPage = () => {
     to: new Date(),
   })
   const [timeScale, setTimeScale] = useState('minutes')
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     fetchData()
   }, [selectedSensor, dateTimeRange, timeScale])
 
-  const fetchData = () => {
-    // This is where you would typically fetch the raw data from your data source
-    // For this example, we'll just generate some dummy data
-    const newData = []
-    let currentDate = new Date(dateTimeRange.from)
-    const totalSeconds = differenceInSeconds(dateTimeRange.to, dateTimeRange.from)
-    let interval: number
+  const fetchData = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/sensors?from=${dateTimeRange.from.toISOString()}&to=${dateTimeRange.to.toISOString()}`)
+      const data = await response.json()
 
-    switch (timeScale) {
-      case 'seconds':
-        interval = 1
-        break
-      case 'minutes':
-        interval = 60
-        break
-      case 'hours':
-        interval = 3600
-        break
-      default:
-        interval = 60
+      if (data.readings) {
+        // Process the data based on the selected time scale
+        const totalSeconds = differenceInSeconds(dateTimeRange.to, dateTimeRange.from)
+        let interval: number
+
+        switch (timeScale) {
+          case 'seconds':
+            interval = 1
+            break
+          case 'minutes':
+            interval = 60
+            break
+          case 'hours':
+            interval = 3600
+            break
+          default:
+            interval = 60
+        }
+
+        // Group readings by time intervals
+        const processedData = []
+        let currentTime = new Date(dateTimeRange.from)
+
+        while (currentTime <= dateTimeRange.to) {
+          const nextTime = addSeconds(currentTime, interval)
+
+          // Find readings in this interval
+          const intervalReadings = data.readings.filter((reading: any) => {
+            const readingTime = new Date(reading.timestamp)
+            return readingTime >= currentTime && readingTime < nextTime
+          })
+
+          // Calculate average for the selected sensor in this interval
+          if (intervalReadings.length > 0) {
+            const sum = intervalReadings.reduce((acc: number, reading: any) => {
+              return acc + (reading[selectedSensor] || 0)
+            }, 0)
+
+            processedData.push({
+              timestamp: currentTime.toISOString(),
+              [selectedSensor]: Number((sum / intervalReadings.length).toFixed(2))
+            })
+          }
+
+          currentTime = nextTime
+        }
+
+        setRawData(processedData)
+      }
+    } catch (error) {
+      console.error('Error fetching sensor data:', error)
+    } finally {
+      setIsLoading(false)
     }
-
-    const steps = Math.min(1000, Math.floor(totalSeconds / interval)) // Limit to 1000 data points max
-
-    for (let i = 0; i <= steps; i++) {
-      newData.push({
-        timestamp: currentDate.toISOString(),
-        [selectedSensor]: Math.random() * 100
-      })
-      currentDate = addSeconds(currentDate, interval)
-    }
-    setRawData(newData)
   }
 
   const handleExport = () => {
@@ -84,7 +114,7 @@ const RawDataPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>
-            <h1 className="text-2xl font-bold mb-4">Data Access</h1>
+            <h1 className="text-2xl font-bold mb-4">Data Export</h1>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -123,16 +153,18 @@ const RawDataPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={fetchData}>Fetch Data</Button>
+            <Button onClick={fetchData} disabled={isLoading}>
+              {isLoading ? 'Loading...' : 'Fetch Data'}
+            </Button>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="rawData">Raw Data</Label>
+              <Label htmlFor="rawData">Raw Data Preview</Label>
               <div className="h-[400px] overflow-auto border rounded-md p-2">
                 <pre className="text-sm">
                   {JSON.stringify(rawData, null, 2)}
                 </pre>
               </div>
             </div>
-            <Button onClick={handleExport}>Export Data</Button>
+            <Button onClick={handleExport} disabled={rawData.length === 0}>Export Data</Button>
           </div>
         </CardContent>
       </Card>
