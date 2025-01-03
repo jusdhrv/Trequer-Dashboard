@@ -3,18 +3,19 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
-import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select"
-import { DateTimeRangePicker } from "../../../components/ui/date-time-range-picker"
-import { format, addSeconds, differenceInSeconds } from "date-fns"
+import { CustomDateRangePicker } from "../../../components/ui/custom-date-range-picker"
+import { format, addSeconds, differenceInSeconds, subHours } from "date-fns"
+import { RefreshCw } from 'lucide-react'
+import { cn } from "../../../lib/utils"
 
 const sensors = [
-  { id: 'temperature', name: 'Temperature (°C)' },
-  { id: 'humidity', name: 'Humidity (%)' },
-  { id: 'methane', name: 'Methane (PPM)' },
-  { id: 'light', name: 'Light (Lux)' },
-  { id: 'atmosphericPressure', name: 'Atmospheric Pressure (hPa)' },
+  { id: 'temperature', name: 'Temperature' },
+  { id: 'humidity', name: 'Humidity' },
+  { id: 'methane', name: 'Methane' },
+  { id: 'light', name: 'Light' },
+  { id: 'atmosphericPressure', name: 'Atmospheric Pressure' },
 ]
 
 const timeScales = [
@@ -23,29 +24,48 @@ const timeScales = [
   { value: 'hours', label: 'Hours' },
 ]
 
+interface DateRange {
+  from: Date
+  to: Date
+}
+
+const getDefaultDateRange = (): DateRange => {
+  const now = new Date()
+  return {
+    from: subHours(now, 1),
+    to: now,
+  }
+}
+
 const RawDataPage = () => {
   const [rawData, setRawData] = useState<any[]>([])
   const [selectedSensor, setSelectedSensor] = useState(sensors[0].id)
-  const [dateTimeRange, setDateTimeRange] = useState({
-    from: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    to: new Date(),
-  })
+  const [dateRange, setDateRange] = useState<DateRange | null>(null)
   const [timeScale, setTimeScale] = useState('minutes')
   const [isLoading, setIsLoading] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
+  // Initialize state after component mounts to prevent hydration mismatch
   useEffect(() => {
+    setDateRange(getDefaultDateRange())
+    setIsClient(true)
+  }, [])
+
+  const handleDateRangeConfirm = () => {
     fetchData()
-  }, [selectedSensor, dateTimeRange, timeScale])
+  }
 
   const fetchData = async () => {
+    if (!dateRange?.from || !dateRange?.to) return
+
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/sensors?from=${dateTimeRange.from.toISOString()}&to=${dateTimeRange.to.toISOString()}`)
+      const response = await fetch(`/api/sensors?from=${dateRange.from.toISOString()}&to=${dateRange.to.toISOString()}`)
       const data = await response.json()
 
       if (data.readings) {
         // Process the data based on the selected time scale
-        const totalSeconds = differenceInSeconds(dateTimeRange.to, dateTimeRange.from)
+        const totalSeconds = differenceInSeconds(dateRange.to, dateRange.from)
         let interval: number
 
         switch (timeScale) {
@@ -64,9 +84,9 @@ const RawDataPage = () => {
 
         // Group readings by time intervals
         const processedData = []
-        let currentTime = new Date(dateTimeRange.from)
+        let currentTime = new Date(dateRange.from)
 
-        while (currentTime <= dateTimeRange.to) {
+        while (currentTime <= dateRange.to) {
           const nextTime = addSeconds(currentTime, interval)
 
           // Find readings in this interval
@@ -100,13 +120,32 @@ const RawDataPage = () => {
   }
 
   const handleExport = () => {
+    if (!dateRange?.from || !dateRange?.to) return
+
+    if (rawData.length === 0) {
+      // Export a message if no data is available
+      const dataStr = JSON.stringify({ message: "No valid data for the selected time range" }, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.download = `${selectedSensor}_no_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
+      link.href = url
+      link.click()
+      return
+    }
+
     const dataStr = JSON.stringify(rawData, null, 2)
     const dataBlob = new Blob([dataStr], { type: 'application/json' })
     const url = URL.createObjectURL(dataBlob)
     const link = document.createElement('a')
-    link.download = `${selectedSensor}_data_${format(dateTimeRange.from, 'yyyyMMdd_HHmmss')}_${format(dateTimeRange.to, 'yyyyMMdd_HHmmss')}.json`
+    link.download = `${selectedSensor}_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
     link.href = url
     link.click()
+  }
+
+  // Don't render until after client-side hydration
+  if (!isClient) {
+    return null
   }
 
   return (
@@ -136,35 +175,62 @@ const RawDataPage = () => {
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label>Select Date and Time Range</Label>
-              <DateTimeRangePicker dateTimeRange={dateTimeRange} setDateTimeRange={setDateTimeRange} />
+              {dateRange && (
+                <CustomDateRangePicker
+                  dateRange={dateRange}
+                  onDateRangeChange={setDateRange}
+                  onConfirm={handleDateRangeConfirm}
+                  minDate={new Date(2020, 0, 1)}
+                  maxDate={new Date()}
+                />
+              )}
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="timeScaleSelect">Select Time Scale</Label>
-              <Select value={timeScale} onValueChange={setTimeScale}>
-                <SelectTrigger id="timeScaleSelect">
-                  <SelectValue placeholder="Select time scale" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeScales.map((scale) => (
-                    <SelectItem key={scale.value} value={scale.value}>
-                      {scale.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select value={timeScale} onValueChange={setTimeScale} className="flex-1">
+                  <SelectTrigger id="timeScaleSelect">
+                    <SelectValue placeholder="Select time scale" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeScales.map((scale) => (
+                      <SelectItem key={scale.value} value={scale.value}>
+                        {scale.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={fetchData}
+                  disabled={isLoading || !dateRange}
+                >
+                  <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+                </Button>
+              </div>
             </div>
-            <Button onClick={fetchData} disabled={isLoading}>
-              {isLoading ? 'Loading...' : 'Fetch Data'}
-            </Button>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="rawData">Raw Data Preview</Label>
               <div className="h-[400px] overflow-auto border rounded-md p-2">
-                <pre className="text-sm">
-                  {JSON.stringify(rawData, null, 2)}
-                </pre>
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : rawData.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    No valid data for the selected time range
+                  </div>
+                ) : (
+                  <pre className="text-sm">
+                    {JSON.stringify(rawData, null, 2)}
+                  </pre>
+                )}
               </div>
             </div>
-            <Button onClick={handleExport} disabled={rawData.length === 0}>Export Data</Button>
+            <Button onClick={handleExport} disabled={isLoading || !dateRange}>
+              Export Data
+            </Button>
           </div>
         </CardContent>
       </Card>
