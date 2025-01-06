@@ -1,41 +1,41 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
+import { Settings2, RefreshCw } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "./ui/sheet"
 import { Label } from "./ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
-import { Settings, RefreshCw } from 'lucide-react'
+import { SensorConfig } from '../lib/sensor-config'
+import { toast } from './ui/use-toast'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { processReadings } from '../lib/utils'
 
 interface GraphWidgetProps {
-  title: string;
-  sensorType: string;
+  title: string
+  sensorType: string
 }
 
 export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
+  const [selectedSensor, setSelectedSensor] = useState(sensorType)
+  const [sensors, setSensors] = useState<SensorConfig[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [data, setData] = useState<any[]>([])
   const [timeRange, setTimeRange] = useState('1h')
   const [isSettingsChanged, setIsSettingsChanged] = useState(false)
-  const [selectedSource, setSelectedSource] = useState('primary')
   const [pollingInterval, setPollingInterval] = useState('30s')
 
-  const fetchData = async () => {
-    try {
-      setIsSettingsChanged(true)
-      const response = await fetch(`/api/sensors?timeRange=${timeRange}&source=${selectedSource}`)
-      const result = await response.json()
-
-      if (result.readings) {
-        setData(processReadings(result.readings, sensorType, timeRange))
-      }
-    } catch (error) {
-      console.error('Error fetching sensor data:', error)
-    } finally {
-      setTimeout(() => setIsSettingsChanged(false), 1000)
-    }
-  }
+  useEffect(() => {
+    fetchSensors()
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -49,14 +49,52 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
 
     const interval = setInterval(fetchData, intervalMs)
     return () => clearInterval(interval)
-  }, [timeRange, sensorType, selectedSource, pollingInterval])
+  }, [timeRange, selectedSensor, pollingInterval])
+
+  const fetchSensors = async () => {
+    try {
+      const response = await fetch('/api/sensors/config')
+      const data = await response.json()
+      if (data.configs) {
+        setSensors(data.configs.filter((config: SensorConfig) => config.isEnabled))
+      }
+    } catch (error) {
+      console.error('Error fetching sensors:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load sensor configurations",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const fetchData = async () => {
+    try {
+      setIsSettingsChanged(true)
+      const response = await fetch(`/api/sensors?timeRange=${timeRange}&sensorType=${selectedSensor}`)
+      const result = await response.json()
+
+      if (result.readings) {
+        setData(processReadings(result.readings, selectedSensor, timeRange))
+      }
+    } catch (error) {
+      console.error('Error fetching sensor data:', error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch sensor data",
+        variant: "destructive",
+      })
+    } finally {
+      setTimeout(() => setIsSettingsChanged(false), 1000)
+    }
+  }
 
   const handleTimeRangeChange = (value: string) => {
     setTimeRange(value)
   }
 
-  const handleSourceChange = (value: string) => {
-    setSelectedSource(value)
+  const handleSensorChange = (value: string) => {
+    setSelectedSensor(value)
   }
 
   const handlePollingChange = (value: string) => {
@@ -109,37 +147,93 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   }
 
   return (
-    <div className="w-full h-full">
-      <div className="flex items-center justify-between pb-2">
-        <h3 className="text-sm font-medium">{title}</h3>
+    <div className="relative">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">{title}</h3>
+      </div>
+      <div className="h-[300px] relative">
+        {data.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" />
+              <XAxis
+                dataKey="index"
+                type="number"
+                domain={[0, 'dataMax']}
+                tickFormatter={formatXAxisTick}
+                interval={timeRange === '1h' ? 4 : timeRange === '6h' ? 5 : timeRange === '24h' ? 7 : 13}
+                stroke="hsl(var(--foreground))"
+              />
+              <YAxis
+                domain={getYAxisDomain()}
+                stroke="hsl(var(--foreground))"
+              />
+              <Tooltip
+                labelFormatter={formatTooltipTime}
+                formatter={(value: number) => [value.toFixed(2), title]}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  color: 'hsl(var(--foreground))'
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="hsl(var(--primary))"
+                isAnimationActive={false}
+                dot={false}
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full bg-muted rounded-lg flex items-center justify-center">
+            <span className="text-muted-foreground">No data available</span>
+          </div>
+        )}
+        {isSettingsChanged && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="h-8 w-8">
-              <Settings className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute bottom-2 right-2 bg-background/50 hover:bg-background/80"
+            >
+              <Settings2 className="h-4 w-4" />
             </Button>
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
-              <SheetTitle>Edit Graph Settings</SheetTitle>
+              <SheetTitle>Graph Settings</SheetTitle>
             </SheetHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Input Source</Label>
-                <Select value={selectedSource} onValueChange={handleSourceChange}>
-                  <SelectTrigger className="col-span-3">
+              <div className="space-y-2">
+                <Label htmlFor="inputSource">Input Source</Label>
+                <Select
+                  value={selectedSensor}
+                  onValueChange={handleSensorChange}
+                >
+                  <SelectTrigger id="inputSource">
                     <SelectValue placeholder="Select input source" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="primary">Primary Sensor</SelectItem>
-                    <SelectItem value="secondary">Secondary Sensor</SelectItem>
-                    <SelectItem value="backup">Backup Sensor</SelectItem>
+                    {sensors.map((sensor) => (
+                      <SelectItem key={sensor.id} value={sensor.id}>
+                        {sensor.name} ({sensor.unit})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Time Range</Label>
+              <div className="space-y-2">
+                <Label htmlFor="timeRange">Time Range</Label>
                 <Select value={timeRange} onValueChange={handleTimeRangeChange}>
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger id="timeRange">
                     <SelectValue placeholder="Select time range" />
                   </SelectTrigger>
                   <SelectContent>
@@ -155,10 +249,10 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Refresh Every</Label>
+              <div className="space-y-2">
+                <Label htmlFor="pollingInterval">Refresh Every</Label>
                 <Select value={pollingInterval} onValueChange={handlePollingChange}>
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger id="pollingInterval">
                     <SelectValue placeholder="Select refresh interval" />
                   </SelectTrigger>
                   <SelectContent>
@@ -178,37 +272,6 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
             </SheetClose>
           </SheetContent>
         </Sheet>
-      </div>
-      <div className="h-[200px] relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="index"
-              type="number"
-              domain={[0, 'dataMax']}
-              tickFormatter={formatXAxisTick}
-              interval={timeRange === '1h' ? 4 : timeRange === '6h' ? 5 : timeRange === '24h' ? 7 : 13}
-            />
-            <YAxis domain={getYAxisDomain()} />
-            <Tooltip
-              labelFormatter={formatTooltipTime}
-              formatter={(value: number) => [value.toFixed(2), title]}
-            />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#8884d8"
-              isAnimationActive={false}
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-        {isSettingsChanged && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
       </div>
     </div>
   )

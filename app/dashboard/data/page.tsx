@@ -9,14 +9,8 @@ import { CustomDateRangePicker } from "../../../components/ui/custom-date-range-
 import { format, addSeconds, differenceInSeconds, subHours } from "date-fns"
 import { RefreshCw } from 'lucide-react'
 import { cn } from "../../../lib/utils"
-
-const sensors = [
-  { id: 'temperature', name: 'Temperature' },
-  { id: 'humidity', name: 'Humidity' },
-  { id: 'methane', name: 'Methane' },
-  { id: 'light', name: 'Light' },
-  { id: 'atmosphericPressure', name: 'Atmospheric Pressure' },
-]
+import { SensorConfig } from '../../../lib/sensor-config'
+import { toast } from '../../../components/ui/use-toast'
 
 const timeScales = [
   { value: 'seconds', label: 'Seconds' },
@@ -39,17 +33,42 @@ const getDefaultDateRange = (): DateRange => {
 
 const RawDataPage = () => {
   const [rawData, setRawData] = useState<any[]>([])
-  const [selectedSensor, setSelectedSensor] = useState(sensors[0].id)
+  const [sensors, setSensors] = useState<SensorConfig[]>([])
+  const [selectedSensor, setSelectedSensor] = useState<string>('')
   const [dateRange, setDateRange] = useState<DateRange | null>(null)
   const [timeScale, setTimeScale] = useState('minutes')
   const [isLoading, setIsLoading] = useState(false)
   const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    fetchSensors()
+  }, [])
 
   // Initialize state after component mounts to prevent hydration mismatch
   useEffect(() => {
     setDateRange(getDefaultDateRange())
     setIsClient(true)
   }, [])
+
+  const fetchSensors = async () => {
+    try {
+      const response = await fetch('/api/sensors/config')
+      const data = await response.json()
+      if (data.configs) {
+        setSensors(data.configs)
+        if (data.configs.length > 0) {
+          setSelectedSensor(data.configs[0].id)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching sensors:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load sensor configurations",
+        variant: "destructive",
+      })
+    }
+  }
 
   const handleDateRangeConfirm = () => {
     fetchData()
@@ -114,6 +133,11 @@ const RawDataPage = () => {
       }
     } catch (error) {
       console.error('Error fetching sensor data:', error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch sensor data",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -122,13 +146,16 @@ const RawDataPage = () => {
   const handleExport = () => {
     if (!dateRange?.from || !dateRange?.to) return
 
+    const selectedSensorConfig = sensors.find(s => s.id === selectedSensor)
+    if (!selectedSensorConfig) return
+
     if (rawData.length === 0) {
       // Export a message if no data is available
       const dataStr = JSON.stringify({ message: "No valid data for the selected time range" }, null, 2)
       const dataBlob = new Blob([dataStr], { type: 'application/json' })
       const url = URL.createObjectURL(dataBlob)
       const link = document.createElement('a')
-      link.download = `${selectedSensor}_no_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
+      link.download = `${selectedSensorConfig.name}_no_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
       link.href = url
       link.click()
       return
@@ -138,7 +165,7 @@ const RawDataPage = () => {
     const dataBlob = new Blob([dataStr], { type: 'application/json' })
     const url = URL.createObjectURL(dataBlob)
     const link = document.createElement('a')
-    link.download = `${selectedSensor}_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
+    link.download = `${selectedSensorConfig.name}_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
     link.href = url
     link.click()
   }
@@ -167,7 +194,7 @@ const RawDataPage = () => {
                 <SelectContent>
                   {sensors.map((sensor) => (
                     <SelectItem key={sensor.id} value={sensor.id}>
-                      {sensor.name}
+                      {sensor.name} ({sensor.unit})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -204,7 +231,7 @@ const RawDataPage = () => {
                   variant="outline"
                   size="icon"
                   onClick={fetchData}
-                  disabled={isLoading || !dateRange}
+                  disabled={isLoading || !dateRange || !selectedSensor}
                 >
                   <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
                 </Button>
@@ -228,7 +255,7 @@ const RawDataPage = () => {
                 )}
               </div>
             </div>
-            <Button onClick={handleExport} disabled={isLoading || !dateRange}>
+            <Button onClick={handleExport} disabled={isLoading || !dateRange || !selectedSensor}>
               Export Data
             </Button>
           </div>

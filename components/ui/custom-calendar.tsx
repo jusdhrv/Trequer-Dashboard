@@ -79,10 +79,11 @@ export function CustomCalendar({
                     size="icon"
                     onClick={handlePrevMonth}
                     disabled={minDate && isBefore(subMonths(month, 1), startOfMonth(minDate))}
+                    className="hover:bg-accent"
                 >
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <div className="font-semibold">
+                <div className="font-semibold text-foreground">
                     {format(month, 'MMMM yyyy')}
                 </div>
                 <Button
@@ -90,6 +91,7 @@ export function CustomCalendar({
                     size="icon"
                     onClick={handleNextMonth}
                     disabled={maxDate && isAfter(addMonths(month, 1), startOfMonth(maxDate))}
+                    className="hover:bg-accent"
                 >
                     <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -122,14 +124,14 @@ export function CustomCalendar({
                             variant="ghost"
                             size="icon"
                             className={cn(
-                                "h-9 w-9 p-0 font-normal relative",
-                                isSelected && "bg-primary/10",
+                                "h-9 w-9 p-0 font-normal relative text-foreground",
+                                isSelected && "bg-accent",
                                 isRangeStart && "bg-primary text-primary-foreground",
                                 isRangeEnd && "bg-primary text-primary-foreground",
                                 !isSelectable && "opacity-50 cursor-not-allowed",
                                 isToday && !isSelected && !isRangeStart && !isRangeEnd && "border border-primary",
                                 (isRangeStart || isRangeEnd) && "hover:bg-primary hover:text-primary-foreground",
-                                isSelected && !isRangeStart && !isRangeEnd && "hover:bg-primary/20"
+                                isSelected && !isRangeStart && !isRangeEnd && "hover:bg-accent"
                             )}
                             disabled={!isSelectable}
                             onClick={() => isSelectable && onSelect(day)}
