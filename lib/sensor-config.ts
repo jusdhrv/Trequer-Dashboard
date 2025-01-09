@@ -1,5 +1,4 @@
-import fs from 'fs'
-import path from 'path'
+import { supabase } from './supabase'
 
 export interface SensorConfig {
     id: string
@@ -12,26 +11,52 @@ export interface SensorConfig {
     description: string
 }
 
-const CONFIG_PATH = path.join(process.cwd(), 'data', 'sensor_config.json')
-
 export async function getSensorConfigs(): Promise<SensorConfig[]> {
     try {
-        const data = await fs.promises.readFile(CONFIG_PATH, 'utf8')
-        const config = JSON.parse(data)
-        return config.sensors
+        const { data, error } = await supabase
+            .from('sensors')
+            .select('*')
+            .order('name')
+
+        if (error) {
+            throw error
+        }
+
+        return data.map(sensor => ({
+            id: sensor.id,
+            name: sensor.name,
+            unit: sensor.unit,
+            pin: sensor.pin,
+            signalType: sensor.signal_type,
+            readingInterval: sensor.reading_interval,
+            isEnabled: sensor.is_enabled,
+            description: sensor.description,
+        }))
     } catch (error) {
-        console.error('Error reading sensor config:', error)
+        console.error('Error fetching sensor configs:', error)
         return []
     }
 }
 
-export async function updateSensorConfig(updatedConfig: SensorConfig[]): Promise<boolean> {
+export async function updateSensorConfig(config: SensorConfig): Promise<boolean> {
     try {
-        await fs.promises.writeFile(
-            CONFIG_PATH,
-            JSON.stringify({ sensors: updatedConfig }, null, 2),
-            'utf8'
-        )
+        const { error } = await supabase
+            .from('sensors')
+            .update({
+                name: config.name,
+                unit: config.unit,
+                pin: config.pin,
+                signal_type: config.signalType,
+                reading_interval: config.readingInterval,
+                is_enabled: config.isEnabled,
+                description: config.description,
+            })
+            .eq('id', config.id)
+
+        if (error) {
+            throw error
+        }
+
         return true
     } catch (error) {
         console.error('Error updating sensor config:', error)
@@ -39,42 +64,47 @@ export async function updateSensorConfig(updatedConfig: SensorConfig[]): Promise
     }
 }
 
-export async function updateSingleSensor(updatedSensor: SensorConfig): Promise<boolean> {
+export async function addSensorConfig(config: Omit<SensorConfig, 'id'>): Promise<string | null> {
     try {
-        const configs = await getSensorConfigs()
-        const index = configs.findIndex(s => s.id === updatedSensor.id)
-        if (index === -1) return false
+        const newId = crypto.randomUUID()
+        const { error } = await supabase
+            .from('sensors')
+            .insert({
+                id: newId,
+                name: config.name,
+                unit: config.unit,
+                pin: config.pin,
+                signal_type: config.signalType,
+                reading_interval: config.readingInterval,
+                is_enabled: config.isEnabled,
+                description: config.description,
+            })
 
-        configs[index] = updatedSensor
-        return await updateSensorConfig(configs)
+        if (error) {
+            throw error
+        }
+
+        return newId
     } catch (error) {
-        console.error('Error updating sensor:', error)
-        return false
+        console.error('Error adding sensor config:', error)
+        return null
     }
 }
 
-export async function addSensor(newSensor: SensorConfig): Promise<boolean> {
+export async function deleteSensorConfig(id: string): Promise<boolean> {
     try {
-        const configs = await getSensorConfigs()
-        if (configs.some(s => s.id === newSensor.id)) return false
+        const { error } = await supabase
+            .from('sensors')
+            .delete()
+            .eq('id', id)
 
-        configs.push(newSensor)
-        return await updateSensorConfig(configs)
+        if (error) {
+            throw error
+        }
+
+        return true
     } catch (error) {
-        console.error('Error adding sensor:', error)
-        return false
-    }
-}
-
-export async function deleteSensor(sensorId: string): Promise<boolean> {
-    try {
-        const configs = await getSensorConfigs()
-        const filteredConfigs = configs.filter(s => s.id !== sensorId)
-        if (filteredConfigs.length === configs.length) return false
-
-        return await updateSensorConfig(filteredConfigs)
-    } catch (error) {
-        console.error('Error deleting sensor:', error)
+        console.error('Error deleting sensor config:', error)
         return false
     }
 } 
