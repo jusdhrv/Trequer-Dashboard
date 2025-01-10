@@ -20,7 +20,7 @@ interface ProcessedData {
     timestamp: string;
 }
 
-export function processReadings(readings: any[], sensorType: string, timeRange: string) {
+export function processReadings(readings: SensorReading[], sensorType: keyof Omit<SensorReading, 'timestamp'>, timeRange: string): ProcessedData[] {
     // Sort readings by timestamp
     const sortedReadings = readings
         .filter(reading => reading[sensorType] !== undefined)
@@ -60,28 +60,11 @@ export function processReadings(readings: any[], sensorType: string, timeRange: 
             interval = 60000 // default to 1 minute
     }
 
-    // Group readings by interval
-    const groupedReadings: { [key: number]: number[] } = {}
-    sortedReadings.forEach(reading => {
-        const timestamp = new Date(reading.timestamp).getTime()
-        const intervalIndex = Math.floor(timestamp / interval)
-        if (!groupedReadings[intervalIndex]) {
-            groupedReadings[intervalIndex] = []
-        }
-        groupedReadings[intervalIndex].push(reading[sensorType])
-    })
-
-    // Calculate averages for each interval
-    const processedData = Object.entries(groupedReadings).map(([intervalIndex, values], index) => {
-        const average = values.reduce((sum, value) => sum + value, 0) / values.length
-        return {
-            index,
-            timestamp: new Date(parseInt(intervalIndex) * interval),
-            value: average
-        }
-    })
-
-    return processedData
+    return sortedReadings.map((reading, index) => ({
+        index,
+        value: reading[sensorType] as number,
+        timestamp: reading.timestamp
+    }))
 }
 
 export function getLatestReading(readings: SensorReading[], sensorType: string): number {

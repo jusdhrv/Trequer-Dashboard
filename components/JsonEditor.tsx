@@ -4,18 +4,18 @@ import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-json'
 import 'ace-builds/src-noconflict/theme-github'
 
-interface JsonEditorProps {
-  initialData: any
-  onUpdate: (newData: any) => void
+interface JsonEditorProps<T> {
+  initialData: T
+  onUpdate: (newData: T) => void
 }
 
-export const JsonEditor = ({ initialData, onUpdate }: JsonEditorProps) => {
+export function JsonEditor<T extends object>({ initialData, onUpdate }: JsonEditorProps<T>) {
   const [json, setJson] = useState(JSON.stringify(initialData, null, 2))
 
   const handleChange = (newValue: string) => {
     setJson(newValue)
     try {
-      const parsedData = JSON.parse(newValue)
+      const parsedData = JSON.parse(newValue) as T
       onUpdate(parsedData)
     } catch (error) {
       console.error('Invalid JSON:', error)

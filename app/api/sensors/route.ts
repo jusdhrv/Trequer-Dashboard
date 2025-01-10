@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
+import { supabase } from '@/lib/supabase'
+import { addSensorReading, getSensorReadings } from '@/lib/sensor-readings'
 
 interface SensorData {
     temperature?: number;
@@ -10,13 +10,6 @@ interface SensorData {
     atmosphericPressure?: number;
     timestamp?: string;
 }
-
-interface StorageData {
-    readings: SensorData[];
-}
-
-const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'sensor_readings.json')
-const MAX_READINGS = 1209600 // 14 days * 24 hours * 60 minutes * 60 seconds = 2 weeks of 1Hz data
 
 export async function POST(request: Request) {
     try {
@@ -43,27 +36,49 @@ export async function POST(request: Request) {
         // Add timestamp if not provided
         if (!data.timestamp) {
             data.timestamp = new Date().toISOString()
+        } else {
+            // Validate timestamp format
+            const timestamp = new Date(data.timestamp)
+            if (isNaN(timestamp.getTime())) {
+                return NextResponse.json(
+                    { error: 'Invalid timestamp format' },
+                    { status: 400 }
+                )
+            }
+            // Check if timestamp is not in the future
+            if (timestamp > new Date()) {
+                return NextResponse.json(
+                    { error: 'Timestamp cannot be in the future' },
+                    { status: 400 }
+                )
+            }
+            // Check if timestamp is not too old (e.g., more than 24 hours)
+            const oneDayAgo = new Date()
+            oneDayAgo.setDate(oneDayAgo.getDate() - 1)
+            if (timestamp < oneDayAgo) {
+                return NextResponse.json(
+                    { error: 'Timestamp is too old' },
+                    { status: 400 }
+                )
+            }
         }
 
-        // Read existing data
-        let storageData: StorageData
-        try {
-            const fileContent = await fs.readFile(DATA_FILE_PATH, 'utf-8')
-            storageData = JSON.parse(fileContent)
-        } catch (error) {
-            storageData = { readings: [] }
+        // Ensure at least one sensor value is provided
+        const hasSensorValue = Object.entries(data).some(([key, value]) => 
+            key !== 'timestamp' && value !== undefined && value !== null
+        )
+        if (!hasSensorValue) {
+            return NextResponse.json(
+                { error: 'At least one sensor value must be provided' },
+                { status: 400 }
+            )
         }
 
-        // Add new reading
-        storageData.readings.push(data)
+        const success = await addSensorReading(data)
 
-        // Keep only last MAX_READINGS to maintain 2 weeks of history
-        if (storageData.readings.length > MAX_READINGS) {
-            storageData.readings = storageData.readings.slice(-MAX_READINGS)
+        if (!success) {
+            throw new Error('Failed to add sensor reading')
         }
-
-        // Save updated data
-        await fs.writeFile(DATA_FILE_PATH, JSON.stringify(storageData, null, 2))
 
         return NextResponse.json(
             {
@@ -86,41 +101,33 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url)
         const timeRange = searchParams.get('timeRange') || '1h'
 
-        const fileContent = await fs.readFile(DATA_FILE_PATH, 'utf-8')
-        const data = JSON.parse(fileContent)
-
-        // If no time range specified, return all data
-        if (!timeRange) return NextResponse.json(data)
-
-        // Filter data based on time range
+        // Calculate the time range
         const now = new Date()
-        const cutoff = new Date(now.getTime())
+        const from = new Date(now)
 
         switch (timeRange) {
             case '1h':
-                cutoff.setHours(now.getHours() - 1)
+                from.setHours(now.getHours() - 1)
                 break
             case '6h':
-                cutoff.setHours(now.getHours() - 6)
+                from.setHours(now.getHours() - 6)
                 break
             case '24h':
-                cutoff.setHours(now.getHours() - 24)
+                from.setHours(now.getHours() - 24)
                 break
             case '7d':
-                cutoff.setDate(now.getDate() - 7)
+                from.setDate(now.getDate() - 7)
                 break
             case '14d':
-                cutoff.setDate(now.getDate() - 14)
+                from.setDate(now.getDate() - 14)
                 break
             default:
-                cutoff.setHours(now.getHours() - 1)
+                from.setHours(now.getHours() - 1)
         }
 
-        const filteredReadings = data.readings.filter((reading: SensorData) =>
-            new Date(reading.timestamp!) >= cutoff
-        )
+        const readings = await getSensorReadings(from, now)
 
-        return NextResponse.json({ readings: filteredReadings })
+        return NextResponse.json({ readings })
     } catch (error) {
         console.error('Error reading sensor data:', error)
         return NextResponse.json(

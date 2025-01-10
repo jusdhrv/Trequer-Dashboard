@@ -1,65 +1,40 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Responsive, WidthProvider } from 'react-grid-layout'
+import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import GraphWidget from '../../../components/GraphWidget'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
-const initialData = [
-  [
-    { name: 'Jan', value: 30 },
-    { name: 'Feb', value: 35 },
-    { name: 'Mar', value: 40 },
-    { name: 'Apr', value: 38 },
-    { name: 'May', value: 42 },
-    { name: 'Jun', value: 45 },
+interface GridLayout extends Layout {
+  i: string
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+const initialLayouts: { [key: string]: GridLayout[] } = {
+  lg: [
+    { i: 'graph1', x: 0, y: 0, w: 6, h: 2 },
+    { i: 'graph2', x: 6, y: 0, w: 6, h: 2 },
+    { i: 'graph3', x: 0, y: 2, w: 6, h: 2 },
+    { i: 'graph4', x: 6, y: 2, w: 6, h: 2 },
   ],
-  [
-    { name: 'Jan', value: 0.1 },
-    { name: 'Feb', value: 0.12 },
-    { name: 'Mar', value: 0.11 },
-    { name: 'Apr', value: 0.13 },
-    { name: 'May', value: 0.14 },
-    { name: 'Jun', value: 0.12 },
-  ],
-  [
-    { name: 'Jan', value: 1000 },
-    { name: 'Feb', value: 1010 },
-    { name: 'Mar', value: 1005 },
-    { name: 'Apr', value: 1015 },
-    { name: 'May', value: 1020 },
-    { name: 'Jun', value: 1018 },
-  ],
-  [
-    { name: 'Jan', value: 400 },
-    { name: 'Feb', value: 420 },
-    { name: 'Mar', value: 410 },
-    { name: 'Apr', value: 430 },
-    { name: 'May', value: 425 },
-    { name: 'Jun', value: 415 },
-  ],
-]
+}
 
 const GraphsPage = () => {
   const [mounted, setMounted] = useState(false)
-  const [layouts, setLayouts] = useState({
-    lg: [
-      { i: 'graph1', x: 0, y: 0, w: 6, h: 2 },
-      { i: 'graph2', x: 6, y: 0, w: 6, h: 2 },
-      { i: 'graph3', x: 0, y: 2, w: 6, h: 2 },
-      { i: 'graph4', x: 6, y: 2, w: 6, h: 2 },
-    ],
-  })
+  const [layouts, setLayouts] = useState<Layouts>(initialLayouts)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const onLayoutChange = (layout: any, layouts: any) => {
-    setLayouts(layouts)
+  const onLayoutChange = (currentLayout: Layout[], allLayouts: Layouts) => {
+    setLayouts(allLayouts)
   }
 
   if (!mounted) return null
@@ -78,16 +53,16 @@ const GraphsPage = () => {
         isDraggable={true}
       >
         <div key="graph1">
-          <GraphWidget title="Temperature Readings" initialData={initialData[0]} />
+          <GraphWidget title="Temperature Readings" sensorType="temperature" />
         </div>
         <div key="graph2">
-          <GraphWidget title="Radiation Levels" initialData={initialData[1]} />
+          <GraphWidget title="Radiation Levels" sensorType="radiation" />
         </div>
         <div key="graph3">
-          <GraphWidget title="Atmospheric Pressure" initialData={initialData[2]} />
+          <GraphWidget title="Atmospheric Pressure" sensorType="atmosphericPressure" />
         </div>
         <div key="graph4">
-          <GraphWidget title="Solar Wind Speed" initialData={initialData[3]} />
+          <GraphWidget title="Solar Wind Speed" sensorType="solarWind" />
         </div>
       </ResponsiveGridLayout>
     </div>

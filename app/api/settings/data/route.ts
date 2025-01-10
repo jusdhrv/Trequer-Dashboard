@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-
-const SETTINGS_PATH = path.join(process.cwd(), 'data', 'sensor_readings.json')
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
     try {
-        const data = await fs.promises.readFile(SETTINGS_PATH, 'utf8')
-        const jsonData = JSON.parse(data)
+        const { data, error } = await supabase
+            .from('settings')
+            .select('*')
+            .single()
+
+        if (error) {
+            throw error
+        }
+
         return NextResponse.json({
-            retentionPeriod: jsonData.retentionPeriod || '168h' // Default to 7 days
+            retentionPeriod: data?.retention_period || '168h' // Default to 7 days
         })
     } catch (error) {
         console.error('Error reading data settings:', error)
@@ -21,19 +25,52 @@ export async function POST(req: Request) {
     try {
         const { retentionPeriod } = await req.json()
 
-        // Read current data
-        const data = await fs.promises.readFile(SETTINGS_PATH, 'utf8')
-        const jsonData = JSON.parse(data)
+        // Validate retention period format
+        if (!retentionPeriod || typeof retentionPeriod !== 'string') {
+            return NextResponse.json(
+                { error: 'Retention period must be provided as a string' },
+                { status: 400 }
+            )
+        }
 
-        // Update retention period
-        jsonData.retentionPeriod = retentionPeriod
+        // Validate retention period format (e.g., "168h")
+        const match = retentionPeriod.match(/^(\d+)h$/)
+        if (!match) {
+            return NextResponse.json(
+                { error: 'Retention period must be in the format "Xh" where X is a number' },
+                { status: 400 }
+            )
+        }
 
-        // Write back to file
-        await fs.promises.writeFile(SETTINGS_PATH, JSON.stringify(jsonData, null, 2), 'utf8')
+        // Validate retention period range (e.g., between 1 hour and 30 days)
+        const hours = parseInt(match[1])
+        if (hours < 1 || hours > 720) {
+            return NextResponse.json(
+                { error: 'Retention period must be between 1 hour and 30 days' },
+                { status: 400 }
+            )
+        }
 
-        return NextResponse.json({ success: true })
+        const { error } = await supabase
+            .from('settings')
+            .upsert({
+                id: 'data_settings',
+                retention_period: retentionPeriod
+            })
+
+        if (error) {
+            throw error
+        }
+
+        return NextResponse.json({ 
+            success: true,
+            message: `Retention period updated to ${retentionPeriod}`
+        })
     } catch (error) {
         console.error('Error updating data settings:', error)
-        return NextResponse.json({ error: 'Failed to update data settings' }, { status: 500 })
+        return NextResponse.json(
+            { error: 'Failed to update data settings' },
+            { status: 500 }
+        )
     }
-} 
+}
