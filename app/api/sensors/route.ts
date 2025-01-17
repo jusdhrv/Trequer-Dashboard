@@ -45,22 +45,8 @@ export async function POST(request: Request) {
                     { status: 400 }
                 )
             }
-            // Check if timestamp is not in the future
-            if (timestamp > new Date()) {
-                return NextResponse.json(
-                    { error: 'Timestamp cannot be in the future' },
-                    { status: 400 }
-                )
-            }
-            // Check if timestamp is not too old (e.g., more than 24 hours)
-            const oneDayAgo = new Date()
-            oneDayAgo.setDate(oneDayAgo.getDate() - 1)
-            if (timestamp < oneDayAgo) {
-                return NextResponse.json(
-                    { error: 'Timestamp is too old' },
-                    { status: 400 }
-                )
-            }
+            // Ensure timestamp is a string
+            data.timestamp = timestamp.toISOString()
         }
 
         // Ensure at least one sensor value is provided
@@ -74,7 +60,7 @@ export async function POST(request: Request) {
             )
         }
 
-        const success = await addSensorReading(data)
+        const success = await addSensorReading(data as SensorReading)
 
         if (!success) {
             throw new Error('Failed to add sensor reading')
@@ -135,4 +121,4 @@ export async function GET(request: Request) {
             { status: 500 }
         )
     }
-} 
+}
