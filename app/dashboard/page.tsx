@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import GraphWidget from "../../components/GraphWidget"
+import VideoWidget from "../../components/VideoWidget"
 import { Plus, Pencil, X } from 'lucide-react'
 import { SensorConfig } from '../../lib/sensor-config'
 import { toast } from '../../components/ui/use-toast'
@@ -111,11 +112,8 @@ export default function DashboardPage() {
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               {/* Video Card */}
-              <Card className="p-4">
-                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                  <span className="text-muted-foreground">Video Feed</span>
-                </div>
-              </Card>
+              <VideoWidget></VideoWidget>
+
               {/* Graph Cards */}
               {graphs.map((graph, index) => {
                 const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
@@ -139,7 +137,7 @@ export default function DashboardPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="absolute top-6 right-6 z-10 bg-background/50 hover:bg-background/80"
+                              className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
                               onClick={() => handleDeleteGraph(graph.id)}
                             >
                               <X className="h-4 w-4" />

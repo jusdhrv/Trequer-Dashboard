@@ -104,14 +104,13 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   const handleRefresh = () => {
     fetchData()
   }
-
   const getYAxisDomain = () => {
     if (data.length === 0) return [0, 100]
     const values = data.map(d => d.value)
-    const min = Math.min(...values)
-    const max = Math.max(...values)
-    const padding = (max - min) * 0.1
-    return [Math.max(0, min - padding), max + padding]
+    const min = Math.round(Math.min(...values))
+    const max = Math.round(Math.max(...values))
+    const padding = Math.round((max - min) * 0.1)
+    return [Math.round(Math.max(0, min - padding)), Math.round(max + padding)]
   }
 
   const formatTooltipTime = (index: number) => {
@@ -122,87 +121,41 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   }
 
   const formatXAxisTick = (index: number) => {
-    switch (timeRange) {
-      case '1min':
-        return `${index}s`
-      case '5min':
-        return `${index * 5}s`
-      case '15min':
-        return `${index * 15}s`
-      case '30min':
-        return `${index * 30}s`
-      case '1h':
-        return `${index}min`
-      case '6h':
-        return `${index * 5}min`
-      case '24h':
-        return `${index * 15}min`
-      case '7d':
-        return `${index}h`
-      case '14d':
-        return `${index * 2}h`
-      default:
-        return index.toString()
-    }
+    // switch (timeRange) {
+    //   case '1min':
+    //     return `${index}s`
+    //   case '5min':
+    //     return `${index * 5}s`
+    //   case '15min':
+    //     return `${index * 15}s`
+    //   case '30min':
+    //     return `${index * 30}s`
+    //   case '1h':
+    //     return `${index}min`
+    //   case '6h':
+    //     return `${index * 5}min`
+    //   case '24h':
+    //     return `${index * 15}min`
+    //   case '7d':
+    //     return `${index}h`
+    //   case '14d':
+    //     return `${index * 2}h`
+    //   default:
+    //     return index.toString()
+    // }
+    return `${0}`
   }
 
   return (
     <div className="relative">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">{title}</h3>
-      </div>
-      <div className="h-[300px] relative">
-        {data.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" />
-              <XAxis
-                dataKey="index"
-                type="number"
-                domain={[0, 'dataMax']}
-                tickFormatter={formatXAxisTick}
-                interval={timeRange === '1h' ? 4 : timeRange === '6h' ? 5 : timeRange === '24h' ? 7 : 13}
-                stroke="hsl(var(--foreground))"
-              />
-              <YAxis
-                domain={getYAxisDomain()}
-                stroke="hsl(var(--foreground))"
-              />
-              <Tooltip
-                labelFormatter={formatTooltipTime}
-                formatter={(value: number) => [value.toFixed(2), title]}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  color: 'hsl(var(--foreground))'
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="hsl(var(--primary))"
-                isAnimationActive={false}
-                dot={false}
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-full bg-muted rounded-lg flex items-center justify-center">
-            <span className="text-muted-foreground">No data available</span>
-          </div>
-        )}
-        {isSettingsChanged && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
         <Sheet>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="absolute bottom-2 right-2 bg-background/50 hover:bg-background/80"
+              className="absolute middle-1 right-1 bg-background/50 hover:bg-background/80"
             >
               <Settings2 className="h-4 w-4" />
             </Button>
@@ -272,6 +225,54 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
             </SheetClose>
           </SheetContent>
         </Sheet>
+      </div>
+      <div className="h-[300px] relative">
+        {data.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" />
+              <XAxis
+                dataKey="index"
+                type="number"
+                domain={[0, 'dataMax']}
+                tickFormatter={formatXAxisTick}
+                // tickFormatter='0'
+                interval={timeRange === '1h' ? 4 : timeRange === '6h' ? 5 : timeRange === '24h' ? 7 : 13}
+                stroke="hsl(var(--foreground))"
+              />
+              <YAxis
+                domain={getYAxisDomain()}
+                stroke="hsl(var(--foreground))"
+              />
+              <Tooltip
+                labelFormatter={formatTooltipTime}
+                formatter={(value: number) => [value.toFixed(2), title]}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  color: 'hsl(var(--foreground))'
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="hsl(var(--primary))"
+                isAnimationActive={false}
+                dot={false}
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full bg-muted rounded-lg flex items-center justify-center">
+            <span className="text-muted-foreground">No data available</span>
+          </div>
+        )}
+        {isSettingsChanged && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
       </div>
     </div>
   )
