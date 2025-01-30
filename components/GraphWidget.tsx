@@ -104,6 +104,7 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   const handleRefresh = () => {
     fetchData()
   }
+
   const getYAxisDomain = () => {
     if (data.length === 0) return [0, 100]
     const values = data.map(d => d.value)
@@ -121,35 +122,18 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   }
 
   const formatXAxisTick = (index: number) => {
-    // switch (timeRange) {
-    //   case '1min':
-    //     return `${index}s`
-    //   case '5min':
-    //     return `${index * 5}s`
-    //   case '15min':
-    //     return `${index * 15}s`
-    //   case '30min':
-    //     return `${index * 30}s`
-    //   case '1h':
-    //     return `${index}min`
-    //   case '6h':
-    //     return `${index * 5}min`
-    //   case '24h':
-    //     return `${index * 15}min`
-    //   case '7d':
-    //     return `${index}h`
-    //   case '14d':
-    //     return `${index * 2}h`
-    //   default:
-    //     return index.toString()
-    // }
     return `${0}`
+  }
+
+  const getSensorName = () => {
+    const sensor = sensors.find(sensor => sensor.id === selectedSensor)
+    return sensor ? sensor.name : title
   }
 
   return (
     <div className="relative">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">{title}</h3>
+        <h3 className="text-lg font-semibold">{getSensorName()}</h3>
         <Sheet>
           <SheetTrigger asChild>
             <Button
@@ -277,4 +261,3 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
     </div>
   )
 }
-
