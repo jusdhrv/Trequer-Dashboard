@@ -128,41 +128,29 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   const getYAxisDomain = () => {
     if (data.length === 0) return [0, 100]
     const values = data.map(d => d.value)
-    const max = Math.max(...values)
-    return [0, Math.ceil(max)]
+    const maxValue = Math.max(...values)
+    // Set min to 0 and max to next integer after current max
+    return [0, Math.ceil(maxValue)]
   }
 
   const formatYAxisTick = (value: number) => {
     return value.toFixed(2)
   }
 
-  const formatXAxisTick = (index: number) => {
-    if (index === 0) {
-      switch (timeRange) {
-        case '1min': return '1 min'
-        case '5min': return '5 min'
-        case '15min': return '15 min'
-        case '30min': return '30 min'
-        case '1h': return '1 hour'
-        case '6h': return '6 hours'
-        case '24h': return '24 hours'
-        case '7d': return '7 days'
-        case '14d': return '14 days'
-        default: return timeRange
-      }
-    }
-    return ''
-  }
-
   const formatTooltipTime = (index: number) => {
     const item = data[index]
     if (!item || !item.timestamp) return ''
-    const date = new Date(item.timestamp)
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    // Show relative time from start
+    const startTime = new Date(data[0].timestamp).getTime()
+    const currentTime = new Date(item.timestamp).getTime()
+    const diffMinutes = Math.floor((currentTime - startTime) / 60000)
+    return `${diffMinutes} min`
   }
 
-  const formatTooltipValue = (value: number) => {
-    return [value.toFixed(2), title]
+  const formatXAxisTick = (index: number) => {
+    if (index >= data.length || index !== 0) return ''
+    // Only show time range at origin
+    return timeRange.replace('min', ' min').replace('h', ' hour').replace('d', ' days')
   }
 
   const getSensorName = () => {
@@ -171,7 +159,7 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   }
 
   return (
-    <div className="relative h-[300px]">
+    <div className="relative">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">{getSensorName()}</h3>
         <Sheet>
@@ -250,7 +238,7 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="h-[240px]">
+      <div className="h-[400px] relative">
         {data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
@@ -260,18 +248,17 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
                 type="number"
                 domain={[0, data.length - 1]}
                 tickFormatter={formatXAxisTick}
-                interval="preserveStart"
+                interval={0}
                 stroke="hsl(var(--foreground))"
-                ticks={[0]}
               />
               <YAxis
                 domain={getYAxisDomain()}
-                stroke="hsl(var(--foreground))"
                 tickFormatter={formatYAxisTick}
+                stroke="hsl(var(--foreground))"
               />
               <Tooltip
                 labelFormatter={formatTooltipTime}
-                formatter={formatTooltipValue}
+                formatter={(value: number) => [value.toFixed(2), title]}
                 contentStyle={{
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
