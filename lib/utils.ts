@@ -6,12 +6,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 interface SensorReading {
-    temperature?: number;
-    humidity?: number;
-    methane?: number;
-    light?: number;
-    atmosphericPressure?: number;
+    id?: number;
+    sensor_id: string;
+    value: number;
     timestamp: string;
+    created_at?: string;
 }
 
 interface ProcessedData {
@@ -21,13 +20,29 @@ interface ProcessedData {
 }
 
 export function processReadings(readings: any[], sensorType: string, timeRange: string) {
-    // Sort readings by timestamp
-    const sortedReadings = readings
-        .filter(reading => reading[sensorType] !== undefined)
-        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+    console.log('Processing readings for sensor:', sensorType)
+    console.log('Raw readings:', readings)
 
-    // Calculate interval based on time range
-    let interval: number
+    // Transform readings to match our expected format
+    const sensorReadings = readings.map(reading => ({
+        sensor_id: sensorType,
+        value: reading[sensorType],
+        timestamp: reading.timestamp
+    })).filter(reading => reading.value !== undefined)
+    
+    console.log('Transformed readings:', sensorReadings)
+
+    if (sensorReadings.length === 0) {
+        console.log('No readings found for sensor:', sensorType)
+        return []
+    }
+
+    // Calculate interval based on time range and data points
+    const timeStart = new Date(sensorReadings[0].timestamp).getTime()
+    const timeEnd = new Date(sensorReadings[sensorReadings.length - 1].timestamp).getTime()
+    const timeSpan = timeEnd - timeStart
+    let interval = Math.max(60000, Math.floor(timeSpan / 100)) // At least 1 minute, max 100 points
+
     switch (timeRange) {
         case '1min':
             interval = 1000 // 1 second
@@ -57,37 +72,46 @@ export function processReadings(readings: any[], sensorType: string, timeRange: 
             interval = 7200000 // 2 hours
             break
         default:
-            interval = 60000 // default to 1 minute
+            // Keep the calculated interval
+            break
     }
+
+    console.log('Using interval:', interval, 'ms')
 
     // Group readings by interval
     const groupedReadings: { [key: number]: number[] } = {}
-    sortedReadings.forEach(reading => {
+    sensorReadings.forEach(reading => {
         const timestamp = new Date(reading.timestamp).getTime()
-        const intervalIndex = Math.floor(timestamp / interval)
+        const intervalIndex = Math.floor((timestamp - timeStart) / interval)
         if (!groupedReadings[intervalIndex]) {
             groupedReadings[intervalIndex] = []
         }
-        groupedReadings[intervalIndex].push(reading[sensorType])
+        groupedReadings[intervalIndex].push(reading.value)
     })
+
+    console.log('Grouped readings:', groupedReadings)
 
     // Calculate averages for each interval
-    const processedData = Object.entries(groupedReadings).map(([intervalIndex, values], index) => {
+    const processedData = Object.entries(groupedReadings).map(([intervalIndex, values]) => {
         const average = values.reduce((sum, value) => sum + value, 0) / values.length
+        const timestamp = new Date(timeStart + parseInt(intervalIndex) * interval)
         return {
-            index,
-            timestamp: new Date(parseInt(intervalIndex) * interval),
+            index: parseInt(intervalIndex),
+            timestamp: timestamp.toISOString(),
             value: average
         }
-    })
+    }).sort((a, b) => a.index - b.index)
 
+    console.log('Processed data:', processedData)
     return processedData
 }
 
 export function getLatestReading(readings: SensorReading[], sensorType: string): number {
     if (readings.length === 0) return 0
 
-    const latestReading = readings[readings.length - 1]
-    const value = latestReading[sensorType as keyof SensorReading]
-    return typeof value === 'number' ? Number(value.toFixed(2)) : 0
+    const sensorReadings = readings.filter(reading => reading.sensor_id === sensorType)
+    if (sensorReadings.length === 0) return 0
+
+    const latestReading = sensorReadings[sensorReadings.length - 1]
+    return Number(latestReading.value.toFixed(2))
 } 

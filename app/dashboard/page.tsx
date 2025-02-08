@@ -6,7 +6,7 @@ import { Button } from "../../components/ui/button"
 import GraphWidget from "../../components/GraphWidget"
 import VideoWidget from "../../components/VideoWidget"
 import { Plus, Pencil, X } from 'lucide-react'
-import { SensorConfig } from '../../lib/sensor-config'
+import { SensorConfig } from '../../lib/supabase'
 import { toast } from '../../components/ui/use-toast'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 
@@ -22,20 +22,38 @@ export default function DashboardPage() {
 
   const fetchSensorConfigs = async () => {
     try {
+      // console.log('Fetching sensor configurations...')
       const response = await fetch('/api/sensors/config')
       const data = await response.json()
+      
+      // console.log('API Response:', data)
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
       if (data.configs) {
+        // console.log('Received sensor configs:', data.configs)
         setSensorConfigs(data.configs)
+        
         // Initialize graphs for each enabled sensor
-        setGraphs(data.configs
-          .filter(config => config.isEnabled)
+        const enabledGraphs = data.configs
+          .filter(config => config.is_enabled) // Note: changed from isEnabled to is_enabled
           .map(config => ({
             id: `graph_${config.id}`,
             sensorType: config.id
           }))
-        )
+        
+        // console.log('Setting up graphs for enabled sensors:', enabledGraphs)
+        setGraphs(enabledGraphs)
+      } else {
+        // console.log('No sensor configs found in response:', data)
+        toast({
+          title: "Warning",
+          description: "No sensor configurations found",
+          variant: "destructive",
+        })
       }
-      setIsLoading(false)
     } catch (error) {
       console.error('Error fetching sensor configs:', error)
       toast({
@@ -43,12 +61,13 @@ export default function DashboardPage() {
         description: "Failed to load sensor configurations",
         variant: "destructive",
       })
+    } finally {
       setIsLoading(false)
     }
   }
 
   const handleAddGraph = () => {
-    const enabledSensors = sensorConfigs.filter(config => config.isEnabled)
+    const enabledSensors = sensorConfigs.filter(config => config.is_enabled)
     if (enabledSensors.length === 0) {
       toast({
         title: "Error",
@@ -63,10 +82,12 @@ export default function DashboardPage() {
       sensorType: enabledSensors[0].id
     }
 
+    // console.log('Adding new graph:', newGraph)
     setGraphs(prev => [...prev, newGraph])
   }
 
   const handleDeleteGraph = (graphId: string) => {
+    // console.log('Deleting graph:', graphId)
     setGraphs(prev => prev.filter(graph => graph.id !== graphId))
   }
 
@@ -77,6 +98,7 @@ export default function DashboardPage() {
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
 
+    // console.log('Reordering graphs:', items)
     setGraphs(items)
   }
 
@@ -103,61 +125,39 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="dashboard" direction="horizontal">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              {/* Video Card */}
-              <VideoWidget></VideoWidget>
 
-              {/* Graph Cards */}
-              {graphs.map((graph, index) => {
-                const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
-                if (!sensor) return null
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Video Card */}
+        <VideoWidget />
 
-                return (
-                  <Draggable
-                    key={graph.id}
-                    draggableId={graph.id}
-                    index={index}
-                    isDragDisabled={!isEditing}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <Card className="p-4 relative">
-                          {isEditing && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
-                              onClick={() => handleDeleteGraph(graph.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <GraphWidget
-                            title={`${sensor.name} (${sensor.unit})`}
-                            sensorType={sensor.id}
-                          />
-                        </Card>
-                      </div>
-                    )}
-                  </Draggable>
-                )
-              })}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+        {/* Graph Cards */}
+        {graphs.map((graph, index) => {
+          const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
+          if (!sensor) {
+            // console.log('Could not find sensor config for graph:', graph)
+            return null
+          }
+
+          return (
+            <Card key={graph.id} className="p-4 relative">
+              {isEditing && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
+                  onClick={() => handleDeleteGraph(graph.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+              <GraphWidget
+                title={`${sensor.name} (${sensor.unit})`}
+                sensorType={sensor.id}
+              />
+            </Card>
+          )
+        })}
+      </div>
     </div>
   )
 }

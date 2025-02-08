@@ -29,7 +29,7 @@ export async function purgeOldData() {
         // Write back to file
         await fs.promises.writeFile(DATA_PATH, JSON.stringify(jsonData, null, 2), 'utf8')
 
-        console.log(`Data purge complete. Removed readings older than ${retentionHours} hours.`)
+        // console.log(`Data purge complete. Removed readings older than ${retentionHours} hours.`)
         return true
     } catch (error) {
         console.error('Error purging old data:', error)
