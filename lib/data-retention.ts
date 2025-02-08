@@ -1,35 +1,35 @@
-import { supabase } from './supabase'
+import fs from 'fs'
+import path from 'path'
 import { subHours } from 'date-fns'
 
-export async function purgeOldData(retentionPeriod: string = '168h') {
-    try {
-        // Validate retention period
-        const match = retentionPeriod.match(/^(\d+)h$/)
-        if (!match) {
-            console.error('Invalid retention period format')
-            return false
-        }
+const DATA_PATH = path.join(process.cwd(), 'data', 'sensor_readings.json')
 
-        const hours = parseInt(match[1])
-        if (isNaN(hours) || hours <= 0) {
-            console.error('Invalid retention period value')
-            return false
-        }
+export async function purgeOldData() {
+    try {
+        // Read the current data
+        const data = await fs.promises.readFile(DATA_PATH, 'utf8')
+        const jsonData = JSON.parse(data)
+
+        // Get retention period
+        const retentionPeriod = jsonData.retentionPeriod || '168h' // Default to 7 days
+        const retentionHours = parseInt(retentionPeriod.replace('h', ''))
 
         // Calculate cutoff date
-        const cutoffDate = subHours(new Date(), hours)
+        const cutoffDate = subHours(new Date(), retentionHours)
 
-        // Delete old readings from Supabase
-        const { error } = await supabase
-            .from('sensor_readings')
-            .delete()
-            .lt('timestamp', cutoffDate.toISOString())
+        // Filter out old readings
+        const filteredReadings = jsonData.readings.filter((reading: any) => {
+            const readingDate = new Date(reading.timestamp)
+            return readingDate >= cutoffDate
+        })
 
-        if (error) {
-            throw error
-        }
+        // Update the data with filtered readings
+        jsonData.readings = filteredReadings
 
-        console.log(`Data purge complete. Removed readings older than ${hours} hours.`)
+        // Write back to file
+        await fs.promises.writeFile(DATA_PATH, JSON.stringify(jsonData, null, 2), 'utf8')
+
+        // console.log(`Data purge complete. Removed readings older than ${retentionHours} hours.`)
         return true
     } catch (error) {
         console.error('Error purging old data:', error)

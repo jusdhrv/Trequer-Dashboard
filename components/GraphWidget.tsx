@@ -14,7 +14,7 @@ import {
 } from "./ui/sheet"
 import { Label } from "./ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { SensorConfig } from '../lib/sensor-config'
+import { SensorConfig } from '../lib/supabase'
 import { toast } from './ui/use-toast'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { processReadings } from '../lib/utils'
@@ -53,10 +53,17 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
 
   const fetchSensors = async () => {
     try {
+      console.log('Fetching sensor configurations...')
       const response = await fetch('/api/sensors/config')
       const data = await response.json()
+      
+      console.log('Received sensor configs:', data)
+      
       if (data.configs) {
-        setSensors(data.configs.filter((config: SensorConfig) => config.isEnabled))
+        // Filter enabled sensors and set state
+        const enabledSensors = data.configs.filter((config: SensorConfig) => config.is_enabled)
+        console.log('Enabled sensors:', enabledSensors)
+        setSensors(enabledSensors)
       }
     } catch (error) {
       console.error('Error fetching sensors:', error)
@@ -70,12 +77,21 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
 
   const fetchData = async () => {
     try {
+      console.log(`Fetching data for sensor ${selectedSensor} with timeRange ${timeRange}`)
       setIsSettingsChanged(true)
-      const response = await fetch(`/api/sensors?timeRange=${timeRange}&sensorType=${selectedSensor}`)
+      const response = await fetch(`/api/sensors?timeRange=${timeRange}`)
       const result = await response.json()
 
+      console.log('Received sensor readings:', result)
+
       if (result.readings) {
-        setData(processReadings(result.readings, selectedSensor, timeRange))
+        const processedData = processReadings(result.readings, selectedSensor, timeRange)
+        console.log('Processed data:', processedData)
+        if (processedData.length > 0) {
+          setData(processedData)
+        } else {
+          console.log('No data available for the selected sensor and time range')
+        }
       }
     } catch (error) {
       console.error('Error fetching sensor data:', error)
@@ -90,28 +106,52 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   }
 
   const handleTimeRangeChange = (value: string) => {
+    console.log('Changing time range to:', value)
     setTimeRange(value)
   }
 
   const handleSensorChange = (value: string) => {
+    console.log('Changing selected sensor to:', value)
     setSelectedSensor(value)
   }
 
   const handlePollingChange = (value: string) => {
+    console.log('Changing polling interval to:', value)
     setPollingInterval(value)
   }
 
   const handleRefresh = () => {
+    console.log('Manually refreshing data')
     fetchData()
   }
 
   const getYAxisDomain = () => {
     if (data.length === 0) return [0, 100]
     const values = data.map(d => d.value)
-    const min = Math.min(...values)
     const max = Math.max(...values)
-    const padding = (max - min) * 0.1
-    return [Math.max(0, min - padding), max + padding]
+    return [0, Math.ceil(max)]
+  }
+
+  const formatYAxisTick = (value: number) => {
+    return value.toFixed(2)
+  }
+
+  const formatXAxisTick = (index: number) => {
+    if (index === 0) {
+      switch (timeRange) {
+        case '1min': return '1 min'
+        case '5min': return '5 min'
+        case '15min': return '15 min'
+        case '30min': return '30 min'
+        case '1h': return '1 hour'
+        case '6h': return '6 hours'
+        case '24h': return '24 hours'
+        case '7d': return '7 days'
+        case '14d': return '14 days'
+        default: return timeRange
+      }
+    }
+    return ''
   }
 
   const formatTooltipTime = (index: number) => {
@@ -121,88 +161,25 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
   }
 
-  const formatXAxisTick = (index: number) => {
-    switch (timeRange) {
-      case '1min':
-        return `${index}s`
-      case '5min':
-        return `${index * 5}s`
-      case '15min':
-        return `${index * 15}s`
-      case '30min':
-        return `${index * 30}s`
-      case '1h':
-        return `${index}min`
-      case '6h':
-        return `${index * 5}min`
-      case '24h':
-        return `${index * 15}min`
-      case '7d':
-        return `${index}h`
-      case '14d':
-        return `${index * 2}h`
-      default:
-        return index.toString()
-    }
+  const formatTooltipValue = (value: number) => {
+    return [value.toFixed(2), title]
+  }
+
+  const getSensorName = () => {
+    const sensor = sensors.find(sensor => sensor.id === selectedSensor)
+    return sensor ? sensor.name : title
   }
 
   return (
-    <div className="relative">
+    <div className="relative h-[300px]">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">{title}</h3>
-      </div>
-      <div className="h-[300px] relative">
-        {data.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" />
-              <XAxis
-                dataKey="index"
-                type="number"
-                domain={[0, 'dataMax']}
-                tickFormatter={formatXAxisTick}
-                interval={timeRange === '1h' ? 4 : timeRange === '6h' ? 5 : timeRange === '24h' ? 7 : 13}
-                stroke="hsl(var(--foreground))"
-              />
-              <YAxis
-                domain={getYAxisDomain()}
-                stroke="hsl(var(--foreground))"
-              />
-              <Tooltip
-                labelFormatter={formatTooltipTime}
-                formatter={(value: number) => [value.toFixed(2), title]}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  color: 'hsl(var(--foreground))'
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="hsl(var(--primary))"
-                isAnimationActive={false}
-                dot={false}
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-full bg-muted rounded-lg flex items-center justify-center">
-            <span className="text-muted-foreground">No data available</span>
-          </div>
-        )}
-        {isSettingsChanged && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
+        <h3 className="text-lg font-semibold">{getSensorName()}</h3>
         <Sheet>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="absolute bottom-2 right-2 bg-background/50 hover:bg-background/80"
+              className="absolute middle-1 right-1 bg-background/50 hover:bg-background/80"
             >
               <Settings2 className="h-4 w-4" />
             </Button>
@@ -273,7 +250,50 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
           </SheetContent>
         </Sheet>
       </div>
+      <div className="h-[240px]">
+        {data.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" />
+              <XAxis
+                dataKey="index"
+                type="number"
+                domain={[0, data.length - 1]}
+                tickFormatter={formatXAxisTick}
+                interval="preserveStart"
+                stroke="hsl(var(--foreground))"
+                ticks={[0]}
+              />
+              <YAxis
+                domain={getYAxisDomain()}
+                stroke="hsl(var(--foreground))"
+                tickFormatter={formatYAxisTick}
+              />
+              <Tooltip
+                labelFormatter={formatTooltipTime}
+                formatter={formatTooltipValue}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  color: 'hsl(var(--foreground))'
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="hsl(var(--primary))"
+                isAnimationActive={false}
+                dot={false}
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">No data available</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
-

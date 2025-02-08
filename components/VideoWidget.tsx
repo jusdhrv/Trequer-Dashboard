@@ -31,7 +31,7 @@ const VideoWidget = () => {
   return (
     <Card className="w-full h-full">
       <CardHeader>
-        <CardTitle>Live Surface Video</CardTitle>
+        <CardTitle>Surface View</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="aspect-video bg-gray-200 flex items-center justify-center relative">
@@ -46,21 +46,21 @@ const VideoWidget = () => {
             <source src="/placeholder-video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
-          <Button
+          {/* <Button
             className="absolute bottom-4 right-4"
             onClick={takeSnapshot}
           >
             <Camera className="mr-2 h-4 w-4" />
             Take Snapshot
-          </Button>
+          </Button> */}
         </div>
-        <canvas ref={canvasRef} className="hidden" width="640" height="360" />
+        {/* <canvas ref={canvasRef} className="hidden" width="640" height="360" />
         {snapshotUrl && (
           <div className="mt-4">
             <img src={snapshotUrl} alt="Snapshot" className="mb-2 rounded-md" />
             <Button onClick={exportSnapshot}>Export Snapshot</Button>
           </div>
-        )}
+        )} */}
       </CardContent>
     </Card>
   )

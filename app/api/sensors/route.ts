@@ -1,69 +1,47 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { addSensorReading, getSensorReadings } from '@/lib/sensor-readings'
+import { addSensorReading, getSensorReadings } from '../../../lib/supabase'
+
+interface SensorReading {
+    sensor_id: string;
+    value: number;
+    timestamp: string;
+}
 
 interface SensorData {
-    temperature?: number;
-    humidity?: number;
-    methane?: number;
-    light?: number;
-    atmosphericPressure?: number;
-    timestamp?: string;
+    readings: SensorReading[];
 }
 
 export async function POST(request: Request) {
     try {
         const data: SensorData = await request.json()
+        // console.log('Received sensor data:', data)
 
         // Validate the incoming data
-        if (!data || typeof data !== 'object') {
+        if (!data || !Array.isArray(data.readings)) {
             return NextResponse.json(
-                { error: 'Invalid data format' },
+                { error: 'Invalid data format. Expected array of readings.' },
                 { status: 400 }
             )
         }
 
-        // Validate each sensor value if present
-        for (const [key, value] of Object.entries(data)) {
-            if (key !== 'timestamp' && value !== undefined && typeof value !== 'number') {
+        // Validate each reading
+        for (const reading of data.readings) {
+            if (!reading.sensor_id || typeof reading.value !== 'number' || !reading.timestamp) {
                 return NextResponse.json(
-                    { error: `Invalid ${key} value. Must be a number.` },
+                    { error: 'Invalid reading format. Each reading must have sensor_id, value, and timestamp.' },
                     { status: 400 }
                 )
             }
         }
 
-        // Add timestamp if not provided
-        if (!data.timestamp) {
-            data.timestamp = new Date().toISOString()
-        } else {
-            // Validate timestamp format
-            const timestamp = new Date(data.timestamp)
-            if (isNaN(timestamp.getTime())) {
-                return NextResponse.json(
-                    { error: 'Invalid timestamp format' },
-                    { status: 400 }
-                )
-            }
-            // Ensure timestamp is a string
-            data.timestamp = timestamp.toISOString()
-        }
-
-        // Ensure at least one sensor value is provided
-        const hasSensorValue = Object.entries(data).some(([key, value]) => 
-            key !== 'timestamp' && value !== undefined && value !== null
-        )
-        if (!hasSensorValue) {
-            return NextResponse.json(
-                { error: 'At least one sensor value must be provided' },
-                { status: 400 }
-            )
-        }
-
-        const success = await addSensorReading(data as SensorReading)
+        // Add readings to Supabase
+        const success = await addSensorReading(data.readings)
 
         if (!success) {
-            throw new Error('Failed to add sensor reading')
+            return NextResponse.json(
+                { error: 'Failed to store sensor data' },
+                { status: 500 }
+            )
         }
 
         return NextResponse.json(
@@ -87,33 +65,26 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url)
         const timeRange = searchParams.get('timeRange') || '1h'
 
-        // Calculate the time range
-        const now = new Date()
-        const from = new Date(now)
+        const readings = await getSensorReadings(timeRange)
 
-        switch (timeRange) {
-            case '1h':
-                from.setHours(now.getHours() - 1)
-                break
-            case '6h':
-                from.setHours(now.getHours() - 6)
-                break
-            case '24h':
-                from.setHours(now.getHours() - 24)
-                break
-            case '7d':
-                from.setDate(now.getDate() - 7)
-                break
-            case '14d':
-                from.setDate(now.getDate() - 14)
-                break
-            default:
-                from.setHours(now.getHours() - 1)
-        }
+        // Transform the data to match the expected format
+        const transformedReadings = readings.reduce((acc: Record<string, any>[], reading) => {
+            const existingReading = acc.find(r => r.timestamp === reading.timestamp)
+            
+            if (existingReading) {
+                existingReading[reading.sensor_id] = reading.value
+            } else {
+                const newReading: Record<string, any> = {
+                    timestamp: reading.timestamp
+                }
+                newReading[reading.sensor_id] = reading.value
+                acc.push(newReading)
+            }
+            
+            return acc
+        }, [])
 
-        const readings = await getSensorReadings(from, now)
-
-        return NextResponse.json({ readings })
+        return NextResponse.json({ readings: transformedReadings })
     } catch (error) {
         console.error('Error reading sensor data:', error)
         return NextResponse.json(
@@ -121,4 +92,4 @@ export async function GET(request: Request) {
             { status: 500 }
         )
     }
-}
+} 

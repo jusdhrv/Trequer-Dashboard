@@ -1,52 +1,70 @@
 import { NextResponse } from 'next/server'
-import { getSensorConfigs, updateSensorConfig, addSensorConfig, deleteSensorConfig, type SensorConfig } from '../../../../lib/sensor-config'
+import { 
+    getSensorConfigs, 
+    updateSensorConfig, 
+    updateSingleSensor, 
+    addSensor, 
+    deleteSensor,
+    type SensorConfig 
+} from '../../../../lib/supabase'
 
 export async function GET() {
     try {
+        // console.log('Fetching sensor configs from Supabase...')
         const configs = await getSensorConfigs()
+        // console.log('Received configs:', configs)
+        
+        if (!configs || configs.length === 0) {
+            // console.log('No sensor configs found in database')
+            return NextResponse.json({ configs: [] })
+        }
+
         return NextResponse.json({ configs })
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch sensor configurations' }, { status: 500 })
+        console.error('Error fetching sensor configs:', error)
+        return NextResponse.json(
+            { error: 'Failed to fetch sensor configurations', details: error }, 
+            { status: 500 }
+        )
     }
-}
-
-interface SensorRequest {
-    action: 'update' | 'add' | 'delete'
-    sensor: Partial<SensorConfig> & { id?: string }
 }
 
 export async function POST(req: Request) {
     try {
-        const data = await req.json() as SensorRequest
+        const data = await req.json()
         const { action, sensor } = data
+        // console.log(`Processing ${action} action for sensor:`, sensor)
 
-        if (!sensor) {
-            return NextResponse.json({ error: 'Missing sensor data' }, { status: 400 })
-        }
-
+        let success = false
         switch (action) {
             case 'update':
-                if (!sensor.id) {
-                    return NextResponse.json({ error: 'Missing sensor ID' }, { status: 400 })
+                if (Array.isArray(sensor)) {
+                    // console.log('Updating multiple sensors:', sensor)
+                    success = await updateSensorConfig(sensor)
+                } else {
+                    // console.log('Updating single sensor:', sensor)
+                    success = await updateSingleSensor(sensor)
                 }
-                const success = await updateSensorConfig(sensor as SensorConfig)
-                return NextResponse.json({ success })
-            case 'add': {
-                const { id, ...sensorData } = sensor
-                const newId = await addSensorConfig(sensorData as Omit<SensorConfig, 'id'>)
-                return NextResponse.json({ success: !!newId, id: newId })
-            }
+                break
+            case 'add':
+                // console.log('Adding new sensor:', sensor)
+                success = await addSensor(sensor)
+                break
             case 'delete':
-                if (!sensor.id) {
-                    return NextResponse.json({ error: 'Missing sensor ID' }, { status: 400 })
-                }
-                const deleteSuccess = await deleteSensorConfig(sensor.id)
-                return NextResponse.json({ success: deleteSuccess })
+                // console.log('Deleting sensor:', sensor.id)
+                success = await deleteSensor(sensor.id)
+                break
             default:
                 return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
         }
+
+        // console.log(`${action} operation ${success ? 'succeeded' : 'failed'}`)
+        return NextResponse.json({ success })
     } catch (error) {
-        console.error('Error processing sensor request:', error)
-        return NextResponse.json({ error: 'Failed to process request' }, { status: 500 })
+        console.error('Error processing request:', error)
+        return NextResponse.json(
+            { error: 'Failed to process request', details: error }, 
+            { status: 500 }
+        )
     }
 } 
