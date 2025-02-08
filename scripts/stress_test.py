@@ -11,68 +11,79 @@ class SensorSimulator:
         self.base_url = base_url
         self.api_endpoint = f"{base_url}/api/sensors"
         
-        # Base values for each sensor
-        self.base_values = {
-            "temperature": 22.0,      # Celsius
-            "humidity": 45.0,         # Percentage
-            "methane": 2.0,           # PPM
-            "light": 800.0,           # Lux
-            "atmosphericPressure": 1013.25  # hPa
-        }
-        
-        # Noise and drift parameters
-        self.noise_amplitude = {
-            "temperature": 0.5,
-            "humidity": 2.0,
-            "methane": 0.2,
-            "light": 50.0,
-            "atmosphericPressure": 1.0
-        }
-        
-        # Periodic variation parameters (simulating day/night cycles)
-        self.periodic_amplitude = {
-            "temperature": 5.0,
-            "humidity": 15.0,
-            "methane": 1.0,
-            "light": 500.0,
-            "atmosphericPressure": 5.0
+        # Sensor configurations
+        self.sensors = {
+            "temperature": {
+                "id": "temperature",
+                "base_value": 22.0,      # Celsius
+                "noise_amplitude": 0.5,
+                "periodic_amplitude": 5.0
+            },
+            "humidity": {
+                "id": "humidity",
+                "base_value": 45.0,      # Percentage
+                "noise_amplitude": 2.0,
+                "periodic_amplitude": 15.0
+            },
+            "methane": {
+                "id": "methane",
+                "base_value": 2.0,       # PPM
+                "noise_amplitude": 0.2,
+                "periodic_amplitude": 1.0
+            },
+            "light": {
+                "id": "light",
+                "base_value": 800.0,     # Lux
+                "noise_amplitude": 50.0,
+                "periodic_amplitude": 500.0
+            },
+            "atmosphericPressure": {
+                "id": "atmosphericPressure",
+                "base_value": 1013.25,   # hPa
+                "noise_amplitude": 1.0,
+                "periodic_amplitude": 5.0
+            }
         }
         
         self.start_time = time.time()
 
-    def generate_reading(self):
+    def generate_reading(self, sensor_id, config):
         """Generate a realistic sensor reading with noise and periodic variations"""
         current_time = time.time() - self.start_time
-        reading = {}
         
-        for sensor, base_value in self.base_values.items():
-            # Add periodic variation (24-hour cycle)
-            periodic = math.sin(2 * math.pi * current_time / (24 * 3600))
-            periodic_component = self.periodic_amplitude[sensor] * periodic
-            
-            # Add random noise
-            noise = random.gauss(0, self.noise_amplitude[sensor] * 0.1)
-            
-            # Combine components
-            value = base_value + periodic_component + noise
-            
-            # Ensure values stay within realistic ranges
-            if sensor == "humidity":
-                value = max(0, min(100, value))
-            elif sensor == "methane":
-                value = max(0, value)
-            elif sensor == "light":
-                value = max(0, value)
-            
-            reading[sensor] = round(value, 2)
+        # Add periodic variation (24-hour cycle)
+        periodic = math.sin(2 * math.pi * current_time / (24 * 3600))
+        periodic_component = config["periodic_amplitude"] * periodic
         
-        return reading
+        # Add random noise
+        noise = random.gauss(0, config["noise_amplitude"] * 0.1)
+        
+        # Combine components
+        value = config["base_value"] + periodic_component + noise
+        
+        # Ensure values stay within realistic ranges
+        if sensor_id == "humidity":
+            value = max(0, min(100, value))
+        elif sensor_id in ["methane", "light"]:
+            value = max(0, value)
+        
+        return round(value, 2)
 
-    def send_reading(self):
-        """Send a single reading to the API"""
-        reading = self.generate_reading()
+    def send_readings(self):
+        """Send readings for all sensors to the API"""
+        timestamp = datetime.utcnow().isoformat() + "Z"
+        readings = []
+        
+        for sensor_id, config in self.sensors.items():
+            value = self.generate_reading(sensor_id, config)
+            readings.append({
+                "sensor_id": sensor_id,
+                "value": value,
+                "timestamp": timestamp
+            })
+        
         try:
-            response = requests.post(self.api_endpoint, json=reading)
+            response = requests.post(self.api_endpoint, json={"readings": readings})
             if response.status_code != 200:
                 print(f"Error sending data: {response.status_code} - {response.text}")
             return response.status_code == 200
@@ -92,7 +103,7 @@ def run_stress_test(duration, delay=1.0, infinite=False):
     
     try:
         while infinite or time.time() - start_time < duration:
-            if simulator.send_reading():
+            if simulator.send_readings():
                 successful_requests += 1
             else:
                 failed_requests += 1
