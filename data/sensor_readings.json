@@ -1,28 +1,3 @@
 {
-  "readings": [
-    {
-      "temperature": 22.14,
-      "humidity": 45.7,
-      "methane": 2.03,
-      "light": 830.13,
-      "atmosphericPressure": 1013.52,
-      "timestamp": "2025-01-17T07:58:31.890Z"
-    },
-    {
-      "temperature": 22.24,
-      "humidity": 45.74,
-      "methane": 2.04,
-      "light": 817.44,
-      "atmosphericPressure": 1013.43,
-      "timestamp": "2025-01-17T07:58:33.853Z"
-    },
-    {
-      "temperature": 22.17,
-      "humidity": 45.75,
-      "methane": 2.02,
-      "light": 827.29,
-      "atmosphericPressure": 1013.48,
-      "timestamp": "2025-01-17T07:58:34.959Z"
-    }
-  ]
+  "readings": []
 }

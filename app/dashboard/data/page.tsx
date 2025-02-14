@@ -215,8 +215,8 @@ const RawDataPage = () => {
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="timeScaleSelect">Select Time Scale</Label>
               <div className="flex gap-2">
-                <Select value={timeScale} onValueChange={setTimeScale} className="flex-1">
-                  <SelectTrigger id="timeScaleSelect">
+                <Select value={timeScale} onValueChange={setTimeScale}>
+                  <SelectTrigger id="timeScaleSelect" className="flex-1">
                     <SelectValue placeholder="Select time scale" />
                   </SelectTrigger>
                   <SelectContent>

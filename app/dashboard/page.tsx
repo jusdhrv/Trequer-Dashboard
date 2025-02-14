@@ -6,7 +6,7 @@ import { Button } from "../../components/ui/button"
 import GraphWidget from "../../components/GraphWidget"
 import VideoWidget from "../../components/VideoWidget"
 import { Plus, Pencil, X } from 'lucide-react'
-import { SensorConfig } from '../../lib/supabase'
+import { SensorConfig } from '../../lib/sensor-config'
 import { toast } from '../../components/ui/use-toast'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 
@@ -38,8 +38,8 @@ export default function DashboardPage() {
         
         // Initialize graphs for each enabled sensor
         const enabledGraphs = data.configs
-          .filter(config => config.is_enabled) // Note: changed from isEnabled to is_enabled
-          .map(config => ({
+          .filter((config: SensorConfig) => config.isEnabled)
+          .map((config: SensorConfig) => ({
             id: `graph_${config.id}`,
             sensorType: config.id
           }))
@@ -67,7 +67,7 @@ export default function DashboardPage() {
   }
 
   const handleAddGraph = () => {
-    const enabledSensors = sensorConfigs.filter(config => config.is_enabled)
+    const enabledSensors = sensorConfigs.filter((config: SensorConfig) => config.isEnabled)
     if (enabledSensors.length === 0) {
       toast({
         title: "Error",
