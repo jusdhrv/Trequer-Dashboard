@@ -7,7 +7,7 @@ export interface SensorConfig {
     pin: string
     signalType: 'analog' | 'digital'
     readingInterval: number
-    isEnabled: boolean
+    is_enabled: boolean
     description: string
 }
 
@@ -29,7 +29,7 @@ export async function getSensorConfigs(): Promise<SensorConfig[]> {
             pin: sensor.pin,
             signalType: sensor.signal_type,
             readingInterval: sensor.reading_interval,
-            isEnabled: sensor.is_enabled,
+            is_enabled: sensor.is_enabled,
             description: sensor.description,
         }))
     } catch (error) {
@@ -48,7 +48,7 @@ export async function updateSensorConfig(config: SensorConfig): Promise<boolean>
                 pin: config.pin,
                 signal_type: config.signalType,
                 reading_interval: config.readingInterval,
-                is_enabled: config.isEnabled,
+                is_enabled: config.is_enabled,
                 description: config.description,
             })
             .eq('id', config.id)
@@ -76,7 +76,7 @@ export async function addSensorConfig(config: Omit<SensorConfig, 'id'>): Promise
                 pin: config.pin,
                 signal_type: config.signalType,
                 reading_interval: config.readingInterval,
-                is_enabled: config.isEnabled,
+                is_enabled: config.is_enabled,
                 description: config.description,
             })
 

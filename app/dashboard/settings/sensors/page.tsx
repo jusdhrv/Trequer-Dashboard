@@ -120,7 +120,7 @@ export default function SensorSettingsPage() {
             pin: '',
             signalType: 'analog',
             readingInterval: 5000,
-            isEnabled: true,
+            is_enabled: true,
             description: ''
         }
 
@@ -238,10 +238,10 @@ export default function SensorSettingsPage() {
                                                                 <Label>Enabled</Label>
                                                                 <div className="flex items-center space-x-2">
                                                                     <Switch
-                                                                        checked={sensor.isEnabled}
-                                                                        onCheckedChange={checked => handleUpdateField(sensor.id, 'isEnabled', checked)}
+                                                                        checked={sensor.is_enabled}
+                                                                        onCheckedChange={checked => handleUpdateField(sensor.id, 'is_enabled', checked)}
                                                                     />
-                                                                    <span>{sensor.isEnabled ? 'Yes' : 'No'}</span>
+                                                                    <span>{sensor.is_enabled ? 'Yes' : 'No'}</span>
                                                                 </div>
                                                             </div>
                                                         </div>

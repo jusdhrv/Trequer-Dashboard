@@ -38,7 +38,7 @@ export default function DashboardPage() {
         
         // Initialize graphs for each enabled sensor
         const enabledGraphs = data.configs
-          .filter((config: SensorConfig) => config.isEnabled)
+          .filter((config: SensorConfig) => config.is_enabled)
           .map((config: SensorConfig) => ({
             id: `graph_${config.id}`,
             sensorType: config.id
@@ -67,7 +67,7 @@ export default function DashboardPage() {
   }
 
   const handleAddGraph = () => {
-    const enabledSensors = sensorConfigs.filter((config: SensorConfig) => config.isEnabled)
+    const enabledSensors = sensorConfigs.filter((config: SensorConfig) => config.is_enabled)
     if (enabledSensors.length === 0) {
       toast({
         title: "Error",
