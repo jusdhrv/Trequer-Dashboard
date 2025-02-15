@@ -2,18 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // Client for public operations (reading data)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Client with service role for admin operations (writing data)
-const serviceClient = createClient(supabaseUrl, supabaseServiceKey!, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
-    }
-})
 
 // Type definitions for our tables
 export type SensorConfig = {
@@ -49,7 +40,7 @@ export async function getSensorConfigs() {
 }
 
 export async function updateSensorConfig(updatedConfig: SensorConfig[]) {
-    const { error } = await serviceClient
+    const { error } = await supabase
         .from('sensor_configs')
         .upsert(updatedConfig.map(config => ({
             ...config,
@@ -60,7 +51,7 @@ export async function updateSensorConfig(updatedConfig: SensorConfig[]) {
 }
 
 export async function updateSingleSensor(updatedSensor: SensorConfig) {
-    const { error } = await serviceClient
+    const { error } = await supabase
         .from('sensor_configs')
         .upsert({
             ...updatedSensor,
@@ -71,7 +62,7 @@ export async function updateSingleSensor(updatedSensor: SensorConfig) {
 }
 
 export async function addSensor(newSensor: SensorConfig) {
-    const { error } = await serviceClient
+    const { error } = await supabase
         .from('sensor_configs')
         .insert({
             ...newSensor,
@@ -83,7 +74,7 @@ export async function addSensor(newSensor: SensorConfig) {
 }
 
 export async function deleteSensor(sensorId: string) {
-    const { error } = await serviceClient
+    const { error } = await supabase
         .from('sensor_configs')
         .delete()
         .eq('id', sensorId)
@@ -100,7 +91,7 @@ export async function addSensorReading(readings: SensorReading[]) {
         created_at: new Date().toISOString()
     }))
 
-    const { error } = await serviceClient // Use service client for inserting readings
+    const { error } = await supabase // Use service client for inserting readings
         .from('sensor_readings')
         .insert(readingsToInsert)
     
