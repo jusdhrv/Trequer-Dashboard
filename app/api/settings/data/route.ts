@@ -8,10 +8,7 @@ export async function GET() {
             .select('key, value')
             .in('key', ['sensor_readings_retention_hours', 'diagnostic_readings_retention_hours'])
 
-        if (error) {
-            console.error('Supabase error fetching settings:', error)
-            throw error
-        }
+        if (error) throw error
 
         // If no settings found, return default values
         const sensorRetentionHours = settings?.find(s => s.key === 'sensor_readings_retention_hours')?.value ?? 168; // Default 7 days
@@ -22,7 +19,6 @@ export async function GET() {
             diagnosticRetentionHours,
         })
     } catch (error) {
-        console.error('Error fetching settings:', error)
         return NextResponse.json(
             { error: 'Failed to fetch settings' },
             { status: 500 }
@@ -54,8 +50,6 @@ export async function POST(request: Request) {
             ? 'sensor_readings_retention_hours' 
             : 'diagnostic_readings_retention_hours'
 
-        console.log('Updating settings:', { key, value: hours })
-
         // First check if the setting exists
         const { data: existingSettings, error: fetchError } = await supabase
             .from('settings')
@@ -63,10 +57,7 @@ export async function POST(request: Request) {
             .eq('key', key)
             .single()
 
-        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "not found" error
-            console.error('Error checking existing setting:', fetchError)
-            throw fetchError
-        }
+        if (fetchError && fetchError.code !== 'PGRST116') throw fetchError
 
         let updateError
         if (existingSettings) {
@@ -88,15 +79,10 @@ export async function POST(request: Request) {
             updateError = error
         }
 
-        if (updateError) {
-            console.error('Error updating setting:', updateError)
-            throw updateError
-        }
+        if (updateError) throw updateError
 
-        console.log('Successfully updated setting:', { key, value: hours })
         return NextResponse.json({ success: true })
     } catch (error) {
-        console.error('Error updating settings:', error)
         return NextResponse.json(
             { error: error instanceof Error ? error.message : 'Failed to update settings' },
             { status: 500 }
