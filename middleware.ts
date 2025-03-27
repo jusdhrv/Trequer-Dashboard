@@ -10,18 +10,27 @@ export async function middleware(req: NextRequest) {
         data: { session },
     } = await supabase.auth.getSession()
 
-    // TODO: Come back here and fix authentication
-    // // If there's no session and the user is trying to access a protected route
+    console.log('Session:', session)
+    console.log('Request Path:', req.nextUrl.pathname)
+
+    // // Allow access to the dashboard if the user is authenticated
+    // if (session && req.nextUrl.pathname.startsWith('/dashboard')) {
+    //     return res; // Allow access
+    // }
+
+    // // Redirect unauthenticated users trying to access protected routes
     // if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
     //     const redirectUrl = req.nextUrl.clone()
     //     redirectUrl.pathname = '/login'
+    //     console.log('Redirecting to login for unauthenticated user')
     //     return NextResponse.redirect(redirectUrl)
     // }
 
-    // // If there's a session and the user is on the login page
+    // // Redirect authenticated users trying to access the login page
     // if (session && req.nextUrl.pathname === '/login') {
     //     const redirectUrl = req.nextUrl.clone()
     //     redirectUrl.pathname = '/dashboard'
+    //     console.log('Redirecting to dashboard for authenticated user')
     //     return NextResponse.redirect(redirectUrl)
     // }
 

@@ -2,9 +2,21 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // Client for public operations (reading data)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false // Don't persist auth state
+  }
+})
+
+// Client with elevated privileges for admin operations
+export const adminSupabase = createClient(supabaseUrl, supabaseServiceKey!, {
+  auth: {
+    persistSession: false // Don't persist auth state
+  }
+})
 
 // Type definitions for our tables
 export type SensorConfig = {

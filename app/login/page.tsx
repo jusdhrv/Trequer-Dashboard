@@ -1,135 +1,150 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [loginAttempts, setLoginAttempts] = useState(0)
-  const [lastAttemptTime, setLastAttemptTime] = useState<Date | null>(null)
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lastAttemptTime, setLastAttemptTime] = useState<Date | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      console.log("Current Session:", session); // Log the current session
       if (session) {
-        router.push('/dashboard')
+        router.push("/dashboard");
       }
-    }
-    checkSession()
-  }, [router])
+    };
+    checkSession();
+  }, [router]);
 
   // Password complexity check
   const isPasswordComplex = (password: string) => {
-    const hasUpperCase = /[A-Z]/.test(password)
-    const hasLowerCase = /[a-z]/.test(password)
-    const hasNumbers = /\d/.test(password)
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    return hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar
-  }
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     // Rate limiting check
     if (loginAttempts >= 5 && lastAttemptTime) {
-      const timeSinceLastAttempt = Date.now() - lastAttemptTime.getTime()
-      if (timeSinceLastAttempt < 300000) { // 5 minutes
-        setError('Too many login attempts. Please try again in 5 minutes.')
-        setIsLoading(false)
-        return
+      const timeSinceLastAttempt = Date.now() - lastAttemptTime.getTime();
+      if (timeSinceLastAttempt < 300000) {
+        // 5 minutes
+        setError("Too many login attempts. Please try again in 5 minutes.");
+        setIsLoading(false);
+        return;
       } else {
         // Reset attempts after timeout
-        setLoginAttempts(0)
+        setLoginAttempts(0);
       }
     }
 
     // Basic validation
     if (!email || !password) {
-      setError('Please enter both email and password')
-      setIsLoading(false)
-      return
+      setError("Please enter both email and password");
+      setIsLoading(false);
+      return;
     }
 
     // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address')
-      setIsLoading(false)
-      return
+      setError("Please enter a valid email address");
+      setIsLoading(false);
+      return;
     }
 
     // Password validation
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long')
-      setIsLoading(false)
-      return
+      setError("Password must be at least 8 characters long");
+      setIsLoading(false);
+      return;
     }
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
+      });
 
       if (error) {
-        // Increment login attempts on failure
-        setLoginAttempts(prev => prev + 1)
-        setLastAttemptTime(new Date())
-        throw error
+        setError(error.message || "An error occurred during login");
+        return; // Prevent redirect if there is an error
       }
 
-      router.push('/dashboard')
-      router.refresh()
+      // Check the session after login
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      console.log("Session after login:", session); // Log the session
+
+      // Redirect to dashboard if session exists
+      if (session) {
+        console.log("Sign-in successful, redirecting to dashboard...");
+        router.push("/dashboard");
+      }
     } catch (error: any) {
-      setError(error.message || 'An error occurred during login')
+      setError(error.message || "An error occurred during login");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     // Basic validation
     if (!email || !password) {
-      setError('Please enter both email and password')
-      setIsLoading(false)
-      return
+      setError("Please enter both email and password");
+      setIsLoading(false);
+      return;
     }
 
     // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address')
-      setIsLoading(false)
-      return
+      setError("Please enter a valid email address");
+      setIsLoading(false);
+      return;
     }
 
     // Password complexity validation
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long')
-      setIsLoading(false)
-      return
+      setError("Password must be at least 8 characters long");
+      setIsLoading(false);
+      return;
     }
 
     if (!isPasswordComplex(password)) {
-      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
-      setIsLoading(false)
-      return
+      setError(
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      );
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -138,31 +153,35 @@ export default function LoginPage() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
-        }
-      })
+        },
+      });
 
       if (error) {
-        throw error
+        throw error;
       }
 
-      setError('Please check your email for the confirmation link')
+      setError("Please check your email for the confirmation link");
     } catch (error: any) {
-      setError(error.message || 'An error occurred during sign up')
+      setError(error.message || "An error occurred during sign up");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black p-4">
       <Card className="w-full max-w-md space-y-6 p-8">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="text-gray-400">Enter your credentials to access your account</p>
+          <p className="text-gray-400">
+            Enter your credentials to access your account
+          </p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
+            <Label htmlFor="email" className="text-white">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
@@ -174,7 +193,9 @@ export default function LoginPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Password</Label>
+            <Label htmlFor="password" className="text-white">
+              Password
+            </Label>
             <Input
               id="password"
               type="password"
@@ -185,9 +206,7 @@ export default function LoginPage() {
               className="bg-gray-800 text-white"
             />
           </div>
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="space-y-2">
             <Button
               type="submit"
@@ -197,7 +216,7 @@ export default function LoginPage() {
               )}
               disabled={isLoading}
             >
-              {isLoading ? 'Loading...' : 'Sign In'}
+              {isLoading ? "Loading..." : "Sign In"}
             </Button>
             <Button
               type="button"
@@ -215,6 +234,5 @@ export default function LoginPage() {
         </form>
       </Card>
     </div>
-  )
+  );
 }
-
