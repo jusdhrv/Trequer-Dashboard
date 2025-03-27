@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { Button } from "./ui/button"
-import { Settings2, RefreshCw } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Settings2, RefreshCw } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -11,152 +11,180 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetClose,
-} from "./ui/sheet"
-import { Label } from "./ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { SensorConfig } from '../lib/supabase'
-import { toast } from './ui/use-toast'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { processReadings } from '../lib/utils'
+} from "./ui/sheet";
+import { Label } from "./ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { SensorConfig } from "../lib/supabase";
+import { toast } from "./ui/use-toast";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { processReadings } from "../lib/utils";
 
 interface GraphWidgetProps {
-  title: string
-  sensorType: string
+  title: string;
+  sensorType: string;
 }
 
 export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
-  const [selectedSensor, setSelectedSensor] = useState(sensorType)
-  const [sensors, setSensors] = useState<SensorConfig[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [data, setData] = useState<any[]>([])
-  const [timeRange, setTimeRange] = useState('1h')
-  const [isSettingsChanged, setIsSettingsChanged] = useState(false)
-  const [pollingInterval, setPollingInterval] = useState('30s')
+  const [selectedSensor, setSelectedSensor] = useState(sensorType);
+  const [sensors, setSensors] = useState<SensorConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<any[]>([]);
+  const [timeRange, setTimeRange] = useState("1h");
+  const [isSettingsChanged, setIsSettingsChanged] = useState(false);
+  const [pollingInterval, setPollingInterval] = useState("30s");
 
   useEffect(() => {
-    fetchSensors()
-  }, [])
+    fetchSensors();
+  }, []);
 
   useEffect(() => {
-    fetchData()
+    fetchData();
 
     // Set up polling based on selected interval
-    const intervalMs = pollingInterval === '10s' ? 10000
-      : pollingInterval === '30s' ? 30000
-        : pollingInterval === '1m' ? 60000
-          : pollingInterval === '5m' ? 300000
-            : 30000 // default to 30s
+    const intervalMs =
+      pollingInterval === "10s"
+        ? 10000
+        : pollingInterval === "30s"
+        ? 30000
+        : pollingInterval === "1m"
+        ? 60000
+        : pollingInterval === "5m"
+        ? 300000
+        : 30000; // default to 30s
 
-    const interval = setInterval(fetchData, intervalMs)
-    return () => clearInterval(interval)
-  }, [timeRange, selectedSensor, pollingInterval])
+    const interval = setInterval(fetchData, intervalMs);
+    return () => clearInterval(interval);
+  }, [timeRange, selectedSensor, pollingInterval]);
 
   const fetchSensors = async () => {
     try {
-      console.log('Fetching sensor configurations...')
-      const response = await fetch('/api/sensors/config')
-      const data = await response.json()
-      
-      console.log('Received sensor configs:', data)
-      
+      // console.log('Fetching sensor configurations...')
+      const response = await fetch("/api/sensors/config");
+      const data = await response.json();
+
+      // console.log('Received sensor configs:', data)
+
       if (data.configs) {
         // Filter enabled sensors and set state
-        const enabledSensors = data.configs.filter((config: SensorConfig) => config.is_enabled)
-        console.log('Enabled sensors:', enabledSensors)
-        setSensors(enabledSensors)
+        const enabledSensors = data.configs.filter(
+          (config: SensorConfig) => config.is_enabled
+        );
+        // console.log('Enabled sensors:', enabledSensors)
+        setSensors(enabledSensors);
       }
     } catch (error) {
-      console.error('Error fetching sensors:', error)
+      console.error("Error fetching sensors:", error);
       toast({
         title: "Error",
         description: "Failed to load sensor configurations",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const fetchData = async () => {
     try {
-      console.log(`Fetching data for sensor ${selectedSensor} with timeRange ${timeRange}`)
-      setIsSettingsChanged(true)
-      const response = await fetch(`/api/sensors?timeRange=${timeRange}`)
-      const result = await response.json()
+      // console.log(`Fetching data for sensor ${selectedSensor} with timeRange ${timeRange}`)
+      setIsSettingsChanged(true);
+      const response = await fetch(`/api/sensors?timeRange=${timeRange}`);
+      const result = await response.json();
 
-      console.log('Received sensor readings:', result)
+      // console.log('Received sensor readings:', result)
 
       if (result.readings) {
-        const processedData = processReadings(result.readings, selectedSensor, timeRange)
-        console.log('Processed data:', processedData)
+        const processedData = processReadings(
+          result.readings,
+          selectedSensor,
+          timeRange
+        );
+        // console.log('Processed data:', processedData)
         if (processedData.length > 0) {
-          setData(processedData)
+          setData(processedData);
         } else {
-          console.log('No data available for the selected sensor and time range')
+          // console.log('No data available for the selected sensor and time range')
         }
       }
     } catch (error) {
-      console.error('Error fetching sensor data:', error)
+      console.error("Error fetching sensor data:", error);
       toast({
         title: "Error",
         description: "Failed to fetch sensor data",
         variant: "destructive",
-      })
+      });
     } finally {
-      setTimeout(() => setIsSettingsChanged(false), 1000)
+      setTimeout(() => setIsSettingsChanged(false), 1000);
     }
-  }
+  };
 
   const handleTimeRangeChange = (value: string) => {
-    console.log('Changing time range to:', value)
-    setTimeRange(value)
-  }
+    // console.log('Changing time range to:', value)
+    setTimeRange(value);
+  };
 
   const handleSensorChange = (value: string) => {
-    console.log('Changing selected sensor to:', value)
-    setSelectedSensor(value)
-  }
+    // console.log('Changing selected sensor to:', value)
+    setSelectedSensor(value);
+  };
 
   const handlePollingChange = (value: string) => {
-    console.log('Changing polling interval to:', value)
-    setPollingInterval(value)
-  }
+    // console.log('Changing polling interval to:', value)
+    setPollingInterval(value);
+  };
 
   const handleRefresh = () => {
-    console.log('Manually refreshing data')
-    fetchData()
-  }
+    // console.log('Manually refreshing data')
+    fetchData();
+  };
 
   const getYAxisDomain = () => {
-    if (data.length === 0) return [0, 100]
-    const values = data.map(d => d.value)
-    const maxValue = Math.max(...values)
+    if (data.length === 0) return [0, 100];
+    const values = data.map((d) => d.value);
+    const maxValue = Math.max(...values);
     // Set min to 0 and max to next integer after current max
-    return [0, Math.ceil(maxValue)]
-  }
+    return [0, Math.ceil(maxValue)];
+  };
 
   const formatYAxisTick = (value: number) => {
-    return value.toFixed(2)
-  }
+    return value.toFixed(2);
+  };
 
   const formatTooltipTime = (index: number) => {
-    const item = data[index]
-    if (!item || !item.timestamp) return ''
+    const item = data[index];
+    if (!item || !item.timestamp) return "";
     // Show relative time from start
-    const startTime = new Date(data[0].timestamp).getTime()
-    const currentTime = new Date(item.timestamp).getTime()
-    const diffMinutes = Math.floor((currentTime - startTime) / 60000)
-    return `${diffMinutes} min`
-  }
+    const startTime = new Date(data[0].timestamp).getTime();
+    const currentTime = new Date(item.timestamp).getTime();
+    const diffMinutes = Math.floor((currentTime - startTime) / 60000);
+    return `${diffMinutes} min`;
+  };
 
   const formatXAxisTick = (index: number) => {
-    if (index >= data.length || index !== 0) return ''
+    if (index >= data.length || index !== 0) return "";
     // Only show time range at origin
-    return timeRange.replace('min', ' min').replace('h', ' hour').replace('d', ' days')
-  }
+    return timeRange
+      .replace("min", " min")
+      .replace("h", " hour")
+      .replace("d", " days");
+  };
 
   const getSensorName = () => {
-    const sensor = sensors.find(sensor => sensor.id === selectedSensor)
-    return sensor ? sensor.name : title
-  }
+    const sensor = sensors.find((sensor) => sensor.id === selectedSensor);
+    return sensor ? sensor.name : title;
+  };
 
   return (
     <div className="relative">
@@ -216,7 +244,10 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="pollingInterval">Refresh Every</Label>
-                <Select value={pollingInterval} onValueChange={handlePollingChange}>
+                <Select
+                  value={pollingInterval}
+                  onValueChange={handlePollingChange}
+                >
                   <SelectTrigger id="pollingInterval">
                     <SelectValue placeholder="Select refresh interval" />
                   </SelectTrigger>
@@ -242,7 +273,10 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
         {data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--muted-foreground))"
+              />
               <XAxis
                 dataKey="index"
                 type="number"
@@ -260,9 +294,9 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
                 labelFormatter={formatTooltipTime}
                 formatter={(value: number) => [value.toFixed(2), title]}
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  color: 'hsl(var(--foreground))'
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  color: "hsl(var(--foreground))",
                 }}
               />
               <Line
@@ -282,5 +316,5 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

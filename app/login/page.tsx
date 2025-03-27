@@ -25,7 +25,7 @@ export default function LoginPage() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      console.log("Current Session:", session); // Log the current session
+      // console.log("Current Session:", session); // Log the current session
       if (session) {
         router.push("/dashboard");
       }
@@ -98,11 +98,11 @@ export default function LoginPage() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      console.log("Session after login:", session); // Log the session
+      // console.log("Session after login:", session); // Log the session
 
       // Redirect to dashboard if session exists
       if (session) {
-        console.log("Sign-in successful, redirecting to dashboard...");
+        // console.log("Sign-in successful, redirecting to dashboard...");
         router.push("/dashboard");
       }
     } catch (error: any) {

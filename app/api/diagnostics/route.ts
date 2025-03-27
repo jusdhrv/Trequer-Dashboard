@@ -45,4 +45,45 @@ export async function GET(request: Request) {
             { status: 500 }
         )
     }
+}
+
+export async function POST(request: Request) {
+    try {
+        const data = await request.json()
+        
+        // Validate required fields
+        const requiredFields = [
+            'cpu_usage',
+            'cpu_temperature',
+            'memory_usage',
+            'disk_usage',
+            'network_usage',
+            'system_uptime',
+            'timestamp'
+        ]
+
+        for (const field of requiredFields) {
+            if (!(field in data)) {
+                return NextResponse.json(
+                    { error: `Missing required field: ${field}` },
+                    { status: 400 }
+                )
+            }
+        }
+
+        // Insert the diagnostic reading
+        const { error } = await supabase
+            .from('diagnostic_readings')
+            .insert([data])
+
+        if (error) throw error
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Error saving diagnostic data:', error)
+        return NextResponse.json(
+            { error: 'Failed to save diagnostic data' },
+            { status: 500 }
+        )
+    }
 } 

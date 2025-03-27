@@ -10,8 +10,8 @@ export async function middleware(req: NextRequest) {
         data: { session },
     } = await supabase.auth.getSession()
 
-    console.log('Session:', session)
-    console.log('Request Path:', req.nextUrl.pathname)
+    // console.log('Session:', session)
+    // console.log('Request Path:', req.nextUrl.pathname)
 
     // // Allow access to the dashboard if the user is authenticated
     // if (session && req.nextUrl.pathname.startsWith('/dashboard')) {
@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
     // if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
     //     const redirectUrl = req.nextUrl.clone()
     //     redirectUrl.pathname = '/login'
-    //     console.log('Redirecting to login for unauthenticated user')
+    //     // console.log('Redirecting to login for unauthenticated user')
     //     return NextResponse.redirect(redirectUrl)
     // }
 
@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
     // if (session && req.nextUrl.pathname === '/login') {
     //     const redirectUrl = req.nextUrl.clone()
     //     redirectUrl.pathname = '/dashboard'
-    //     console.log('Redirecting to dashboard for authenticated user')
+    //     // console.log('Redirecting to dashboard for authenticated user')
     //     return NextResponse.redirect(redirectUrl)
     // }
 

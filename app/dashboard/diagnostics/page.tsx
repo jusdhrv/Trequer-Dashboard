@@ -56,6 +56,41 @@ const defaultLayout: Layout[] = [
   { i: "network", x: 0, y: 10, w: 12, h: 4, static: false },
 ];
 
+const formatNetworkValue = (bytes: number) => {
+  if (bytes >= 1000000000) {
+    return { value: bytes / 1000000000, unit: "GB/s" };
+  } else if (bytes >= 1000000) {
+    return { value: bytes / 1000000, unit: "MB/s" };
+  } else if (bytes >= 1000) {
+    return { value: bytes / 1000, unit: "KB/s" };
+  }
+  return { value: bytes, unit: "B/s" };
+};
+
+const formatYAxis = (value: number, unit: string) => {
+  return `${value} ${unit}`;
+};
+
+// Add this function to format relative time
+const formatRelativeTime = (timestamp: string) => {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds}s ago`;
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes}m ago`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours}h ago`;
+  } else {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days}d ago`;
+  }
+};
+
 export default function DiagnosticsPage() {
   const [timeRange, setTimeRange] = useState("1h");
   const [layout, setLayout] = useState<Layout[]>(defaultLayout);
@@ -65,6 +100,7 @@ export default function DiagnosticsPage() {
   const [width, setWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth - 300 - 64 : 1200 // Subtract sidebar (300px) and padding (32px * 2)
   );
+  const [networkUnit, setNetworkUnit] = useState("B/s");
 
   useEffect(() => {
     const handleResize = () => {
@@ -82,6 +118,16 @@ export default function DiagnosticsPage() {
     const interval = setInterval(fetchDiagnosticData, 60000); // Refresh every minute
     return () => clearInterval(interval);
   }, [timeRange]);
+
+  useEffect(() => {
+    if (diagnosticData.length > 0) {
+      const maxNetworkUsage = Math.max(
+        ...diagnosticData.map((d) => d.network_usage)
+      );
+      const { unit } = formatNetworkValue(maxNetworkUsage);
+      setNetworkUnit(unit);
+    }
+  }, [diagnosticData]);
 
   const fetchDiagnosticData = async () => {
     try {
@@ -106,6 +152,21 @@ export default function DiagnosticsPage() {
     if (isEditing) {
       setLayout(newLayout);
     }
+  };
+
+  const formatNetworkData = (data: any[]) => {
+    return data.map((item) => ({
+      ...item,
+      network_usage: formatNetworkValue(item.network_usage).value,
+    }));
+  };
+
+  // Add shared tooltip props
+  const sharedTooltipProps = {
+    contentStyle: { backgroundColor: "rgba(0, 0, 0, 0.8)" },
+    itemStyle: { color: "#ffffff" },
+    labelStyle: { color: "#ffffff" },
+    labelFormatter: (label: string) => formatRelativeTime(label),
   };
 
   if (isLoading) {
@@ -174,19 +235,35 @@ export default function DiagnosticsPage() {
           <div key="cpu-usage">
             <Card className="h-full">
               <CardHeader>
-                <CardTitle>CPU Usage</CardTitle>
+                <CardTitle>CPU Usage (%)</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={diagnosticData}>
+                  <LineChart
+                    data={diagnosticData}
+                    margin={{ left: 0, right: 20, top: 10, bottom: 20 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="timestamp" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="timestamp"
+                      tickFormatter={formatRelativeTime}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip
+                      {...sharedTooltipProps}
+                      formatter={(value: number) => [
+                        `${value.toFixed(1)}%`,
+                        "CPU Usage",
+                      ]}
+                    />
                     <Line
                       type="monotone"
                       dataKey="cpu_usage"
-                      stroke="#8884d8"
+                      stroke="#ffffff"
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -197,19 +274,32 @@ export default function DiagnosticsPage() {
           <div key="cpu-temp">
             <Card className="h-full">
               <CardHeader>
-                <CardTitle>CPU Temperature</CardTitle>
+                <CardTitle>CPU Temperature (°C)</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={diagnosticData}>
+                  <LineChart
+                    data={diagnosticData}
+                    margin={{ left: 0, right: 20, top: 10, bottom: 20 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="timestamp" />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="timestamp"
+                      tickFormatter={formatRelativeTime}
+                    />
+                    <YAxis tickFormatter={(value) => `${value}°C`} />
+                    <Tooltip
+                      {...sharedTooltipProps}
+                      formatter={(value: number) => [
+                        `${value.toFixed(1)}°C`,
+                        "Temperature",
+                      ]}
+                    />
                     <Line
                       type="monotone"
                       dataKey="cpu_temperature"
-                      stroke="#82ca9d"
+                      stroke="#ffffff"
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -220,19 +310,35 @@ export default function DiagnosticsPage() {
           <div key="memory">
             <Card className="h-full">
               <CardHeader>
-                <CardTitle>Memory Usage</CardTitle>
+                <CardTitle>Memory Usage (%)</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={diagnosticData}>
+                  <LineChart
+                    data={diagnosticData}
+                    margin={{ left: 0, right: 20, top: 10, bottom: 20 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="timestamp" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="timestamp"
+                      tickFormatter={formatRelativeTime}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip
+                      {...sharedTooltipProps}
+                      formatter={(value: number) => [
+                        `${value.toFixed(1)}%`,
+                        "Memory Usage",
+                      ]}
+                    />
                     <Line
                       type="monotone"
                       dataKey="memory_usage"
-                      stroke="#ffc658"
+                      stroke="#ffffff"
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -243,19 +349,35 @@ export default function DiagnosticsPage() {
           <div key="disk">
             <Card className="h-full">
               <CardHeader>
-                <CardTitle>Disk Usage</CardTitle>
+                <CardTitle>Disk Usage (%)</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={diagnosticData}>
+                  <LineChart
+                    data={diagnosticData}
+                    margin={{ left: 0, right: 20, top: 10, bottom: 20 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="timestamp" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="timestamp"
+                      tickFormatter={formatRelativeTime}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip
+                      {...sharedTooltipProps}
+                      formatter={(value: number) => [
+                        `${value.toFixed(1)}%`,
+                        "Disk Usage",
+                      ]}
+                    />
                     <Line
                       type="monotone"
                       dataKey="disk_usage"
-                      stroke="#ff7300"
+                      stroke="#ffffff"
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -266,19 +388,35 @@ export default function DiagnosticsPage() {
           <div key="network">
             <Card className="h-full">
               <CardHeader>
-                <CardTitle>Network Usage</CardTitle>
+                <CardTitle>Network Usage ({networkUnit})</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={diagnosticData}>
+                  <LineChart
+                    data={formatNetworkData(diagnosticData)}
+                    margin={{ left: 0, right: 20, top: 10, bottom: 20 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="timestamp" />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="timestamp"
+                      tickFormatter={formatRelativeTime}
+                    />
+                    <YAxis
+                      width={80}
+                      tickFormatter={(value) => formatYAxis(value, networkUnit)}
+                    />
+                    <Tooltip
+                      {...sharedTooltipProps}
+                      formatter={(value: number) => [
+                        formatYAxis(value, networkUnit),
+                        "Network Usage",
+                      ]}
+                    />
                     <Line
                       type="monotone"
                       dataKey="network_usage"
-                      stroke="#0088fe"
+                      stroke="#ffffff"
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>

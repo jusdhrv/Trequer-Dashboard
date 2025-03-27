@@ -20,8 +20,8 @@ interface ProcessedData {
 }
 
 export function processReadings(readings: any[], sensorType: string, timeRange: string) {
-    console.log('Processing readings for sensor:', sensorType)
-    console.log('Raw readings:', readings)
+    // console.log('Processing readings for sensor:', sensorType)
+    // console.log('Raw readings:', readings)
 
     // Transform readings to match our expected format
     const sensorReadings = readings.map(reading => ({
@@ -30,10 +30,10 @@ export function processReadings(readings: any[], sensorType: string, timeRange: 
         timestamp: reading.timestamp
     })).filter(reading => reading.value !== undefined)
     
-    console.log('Transformed readings:', sensorReadings)
+    // console.log('Transformed readings:', sensorReadings)
 
     if (sensorReadings.length === 0) {
-        console.log('No readings found for sensor:', sensorType)
+        // console.log('No readings found for sensor:', sensorType)
         return []
     }
 
@@ -76,7 +76,7 @@ export function processReadings(readings: any[], sensorType: string, timeRange: 
             break
     }
 
-    console.log('Using interval:', interval, 'ms')
+    // console.log('Using interval:', interval, 'ms')
 
     // Group readings by interval
     const groupedReadings: { [key: number]: number[] } = {}
@@ -89,7 +89,7 @@ export function processReadings(readings: any[], sensorType: string, timeRange: 
         groupedReadings[intervalIndex].push(reading.value)
     })
 
-    console.log('Grouped readings:', groupedReadings)
+    // console.log('Grouped readings:', groupedReadings)
 
     // Calculate averages for each interval
     const processedData = Object.entries(groupedReadings).map(([intervalIndex, values]) => {
@@ -102,7 +102,7 @@ export function processReadings(readings: any[], sensorType: string, timeRange: 
         }
     }).sort((a, b) => a.index - b.index)
 
-    console.log('Processed data:', processedData)
+    // console.log('Processed data:', processedData)
     return processedData
 }
 
