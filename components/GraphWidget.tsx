@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Settings2, RefreshCw } from "lucide-react";
+import { Settings2, RefreshCw, AlertTriangle } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -32,6 +32,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { processReadings } from "../lib/utils";
+import EventOverlay from "./EventOverlay";
+import { Switch } from "./ui/switch";
+import { Slider } from "./ui/slider";
 
 interface GraphWidgetProps {
   title: string;
@@ -46,6 +49,13 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   const [timeRange, setTimeRange] = useState("1h");
   const [isSettingsChanged, setIsSettingsChanged] = useState(false);
   const [pollingInterval, setPollingInterval] = useState("30s");
+  const [proMode, setProMode] = useState(false);
+  const [stdDevThreshold, setStdDevThreshold] = useState(2);
+  const [chartDimensions, setChartDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchSensors();
@@ -69,6 +79,22 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
     const interval = setInterval(fetchData, intervalMs);
     return () => clearInterval(interval);
   }, [timeRange, selectedSensor, pollingInterval]);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setChartDimensions({
+            width: entry.contentRect.width,
+            height: entry.contentRect.height,
+          });
+        }
+      });
+
+      resizeObserver.observe(chartRef.current);
+      return () => resizeObserver.disconnect();
+    }
+  }, []);
 
   const fetchSensors = async () => {
     try {
@@ -259,6 +285,43 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="proMode">Pro Mode</Label>
+                  <Switch
+                    id="proMode"
+                    checked={proMode}
+                    onCheckedChange={setProMode}
+                  />
+                </div>
+                {proMode && (
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <Label htmlFor="stdDevThreshold">
+                        Standard Deviation Threshold (σ)
+                      </Label>
+                      <div className="flex items-center space-x-2">
+                        <Slider
+                          id="stdDevThreshold"
+                          min={1}
+                          max={5}
+                          step={0.1}
+                          value={[stdDevThreshold]}
+                          onValueChange={([value]) => setStdDevThreshold(value)}
+                        />
+                        <span className="min-w-[3ch] text-sm">
+                          {stdDevThreshold}σ
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Values outside {stdDevThreshold} standard deviations
+                        from the mean will be marked as events. Higher values
+                        mean fewer events will be detected.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <SheetClose asChild>
               <Button onClick={handleRefresh} className="mt-4">
@@ -269,46 +332,61 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="h-[400px] relative">
+      <div className="h-[400px] relative" ref={chartRef}>
         {data.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--muted-foreground))"
-              />
-              <XAxis
-                dataKey="index"
-                type="number"
-                domain={[0, data.length - 1]}
-                tickFormatter={formatXAxisTick}
-                interval={0}
-                stroke="hsl(var(--foreground))"
-              />
-              <YAxis
-                domain={getYAxisDomain()}
-                tickFormatter={formatYAxisTick}
-                stroke="hsl(var(--foreground))"
-              />
-              <Tooltip
-                labelFormatter={formatTooltipTime}
-                formatter={(value: number) => [value.toFixed(2), title]}
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  color: "hsl(var(--foreground))",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="hsl(var(--primary))"
-                isAnimationActive={false}
-                dot={false}
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--muted-foreground))"
+                />
+                <XAxis
+                  dataKey="index"
+                  type="number"
+                  domain={[0, data.length - 1]}
+                  tickFormatter={formatXAxisTick}
+                  interval={0}
+                  stroke="hsl(var(--foreground))"
+                />
+                <YAxis
+                  domain={getYAxisDomain()}
+                  tickFormatter={formatYAxisTick}
+                  stroke="hsl(var(--foreground))"
+                />
+                <Tooltip
+                  labelFormatter={formatTooltipTime}
+                  formatter={(value: number) => [value.toFixed(2), title]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    color: "hsl(var(--foreground))",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="hsl(var(--primary))"
+                  isAnimationActive={false}
+                  dot={false}
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+            <EventOverlay
+              sensorId={selectedSensor}
+              startTime={
+                data[0]?.timestamp ? new Date(data[0].timestamp) : new Date()
+              }
+              endTime={
+                data[data.length - 1]?.timestamp
+                  ? new Date(data[data.length - 1].timestamp)
+                  : new Date()
+              }
+              chartWidth={chartDimensions.width}
+              chartHeight={chartDimensions.height}
+            />
+          </>
         ) : (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">No data available</p>

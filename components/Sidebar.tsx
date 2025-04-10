@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "../lib/utils";
-import { LayoutDashboard, Database, Settings, Activity } from "lucide-react";
+import {
+  LayoutDashboard,
+  Database,
+  Settings,
+  Activity,
+  InboxIcon,
+} from "lucide-react";
+import { useUnreadCount } from "@/lib/hooks/useUnreadCount";
+import { Badge } from "./ui/badge";
 
 const routes = [
   {
@@ -11,6 +19,13 @@ const routes = [
     icon: LayoutDashboard,
     href: "/dashboard",
     color: "text-foreground",
+  },
+  {
+    label: "Inbox",
+    icon: InboxIcon,
+    href: "/dashboard/inbox",
+    color: "text-foreground",
+    showCount: true,
   },
   {
     label: "Data",
@@ -34,6 +49,7 @@ const routes = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const unreadCount = useUnreadCount();
 
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-background border-r border-border">
@@ -55,7 +71,12 @@ export default function Sidebar() {
             >
               <div className="flex items-center flex-1">
                 <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-                {route.label}
+                <span className="flex-1">{route.label}</span>
+                {route.showCount && unreadCount > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {unreadCount}
+                  </Badge>
+                )}
               </div>
             </Link>
           ))}

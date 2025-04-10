@@ -1,14 +1,25 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
-import { Settings, Database, Cpu } from 'lucide-react'
-import SensorSettings from './sensors/page'
-import DataSettings from './data/page'
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../components/ui/tabs";
+import { Settings, Database, Cpu, AlertTriangle } from "lucide-react";
+import SensorSettings from "./sensors/page";
+import DataSettings from "./data/page";
+import EventSettings from "./events/page";
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('general')
+  const [activeTab, setActiveTab] = useState("general");
 
   return (
     <div className="p-4">
@@ -17,8 +28,12 @@ export default function SettingsPage() {
           <CardTitle>Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-4"
+          >
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 General
@@ -30,6 +45,10 @@ export default function SettingsPage() {
               <TabsTrigger value="data" className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
                 Data
+              </TabsTrigger>
+              <TabsTrigger value="events" className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Events
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general">
@@ -50,10 +69,12 @@ export default function SettingsPage() {
             <TabsContent value="data">
               <DataSettings />
             </TabsContent>
+            <TabsContent value="events">
+              <EventSettings />
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
