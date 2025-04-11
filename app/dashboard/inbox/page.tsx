@@ -22,9 +22,11 @@ import {
 } from "../../../components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import EventDetails from "@/components/EventDetails";
 
 export default function InboxPage() {
   const [events, setEvents] = useState<any[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [readFilter, setReadFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -167,6 +169,13 @@ export default function InboxPage() {
     }
   };
 
+  const handleEventClick = (event: any) => {
+    if (!event.is_read) {
+      markAsRead(event.id);
+    }
+    setSelectedEvent(event);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -176,7 +185,13 @@ export default function InboxPage() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 space-y-4">
+      {selectedEvent && (
+        <EventDetails
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Event Inbox</CardTitle>
@@ -216,13 +231,13 @@ export default function InboxPage() {
                   <div
                     key={event.id}
                     className={cn(
-                      "flex items-start space-x-4 p-4 rounded-lg border transition-colors",
+                      "flex items-start space-x-4 p-4 rounded-lg border transition-colors cursor-pointer hover:bg-muted/30",
                       !event.is_read && "bg-muted/50"
                     )}
-                    onClick={() => !event.is_read && markAsRead(event.id)}
+                    onClick={() => handleEventClick(event)}
                   >
                     <div className="mt-1">{getEventIcon(event.category)}</div>
-                    <div className="flex-1 space-y-1">
+                    <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <p className="font-medium leading-none">
                           {event.sensor_configs.name}
@@ -238,40 +253,38 @@ export default function InboxPage() {
                         {format(new Date(event.start_time), "PPp")}
                       </p>
                       <p className="text-sm">{event.description}</p>
-                      {event.category === "Unclassified" && (
-                        <div
-                          className="flex items-center space-x-2 pt-2"
-                          onClick={(e) => e.stopPropagation()}
+                      <div
+                        className="flex items-center space-x-2 pt-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            updateEventCategory(event.id, "Threat")
+                          }
                         >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              updateEventCategory(event.id, "Threat")
-                            }
-                          >
-                            Mark as Threat
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              updateEventCategory(event.id, "Scheduled")
-                            }
-                          >
-                            Mark as Scheduled
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              updateEventCategory(event.id, "False_Alarm")
-                            }
-                          >
-                            Mark as False Alarm
-                          </Button>
-                        </div>
-                      )}
+                          Mark as Threat
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            updateEventCategory(event.id, "Scheduled")
+                          }
+                        >
+                          Mark as Scheduled
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            updateEventCategory(event.id, "False_Alarm")
+                          }
+                        >
+                          Mark as False Alarm
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))
