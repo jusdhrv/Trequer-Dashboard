@@ -12,7 +12,15 @@ import { Badge } from "../../../components/ui/badge";
 import { ScrollArea } from "../../../components/ui/scroll-area";
 import { createClient } from "@supabase/supabase-js";
 import { format } from "date-fns";
-import { AlertTriangle, CheckCircle, XCircle, Clock } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Pencil,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,10 +31,12 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import EventDetails from "@/components/EventDetails";
+import EventEditForm from "@/components/EventEditForm";
 
 export default function InboxPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [readFilter, setReadFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -176,6 +186,57 @@ export default function InboxPage() {
     setSelectedEvent(event);
   };
 
+  const handleEditSave = (updatedEvent: any) => {
+    setEvents((prev) =>
+      prev.map((event) =>
+        event.id === updatedEvent.id ? { ...event, ...updatedEvent } : event
+      )
+    );
+    if (selectedEvent?.id === updatedEvent.id) {
+      setSelectedEvent({ ...selectedEvent, ...updatedEvent });
+    }
+  };
+
+  const toggleReadState = async (event: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const newReadState = !event.is_read;
+      const { error } = await supabase
+        .from("sensor_events")
+        .update({
+          is_read: newReadState,
+          read_at: newReadState ? new Date().toISOString() : null,
+        })
+        .eq("id", event.id);
+
+      if (error) throw error;
+
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.id === event.id
+            ? {
+                ...e,
+                is_read: newReadState,
+                read_at: newReadState ? new Date().toISOString() : null,
+              }
+            : e
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: `Event marked as ${newReadState ? "read" : "unread"}`,
+      });
+    } catch (error) {
+      console.error("Error toggling read state:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update event status",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -190,6 +251,14 @@ export default function InboxPage() {
         <EventDetails
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
+        />
+      )}
+      {editingEvent && (
+        <EventEditForm
+          event={editingEvent}
+          isOpen={true}
+          onClose={() => setEditingEvent(null)}
+          onSave={handleEditSave}
         />
       )}
       <Card>
@@ -231,7 +300,7 @@ export default function InboxPage() {
                   <div
                     key={event.id}
                     className={cn(
-                      "flex items-start space-x-4 p-4 rounded-lg border transition-colors cursor-pointer hover:bg-muted/30",
+                      "group flex items-start space-x-4 p-4 rounded-lg border transition-colors cursor-pointer hover:bg-muted/30",
                       !event.is_read && "bg-muted/50"
                     )}
                     onClick={() => handleEventClick(event)}
@@ -253,38 +322,29 @@ export default function InboxPage() {
                         {format(new Date(event.start_time), "PPp")}
                       </p>
                       <p className="text-sm">{event.description}</p>
-                      <div
-                        className="flex items-center space-x-2 pt-2"
-                        onClick={(e) => e.stopPropagation()}
+                    </div>
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingEvent(event);
+                        }}
                       >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            updateEventCategory(event.id, "Threat")
-                          }
-                        >
-                          Mark as Threat
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            updateEventCategory(event.id, "Scheduled")
-                          }
-                        >
-                          Mark as Scheduled
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            updateEventCategory(event.id, "False_Alarm")
-                          }
-                        >
-                          Mark as False Alarm
-                        </Button>
-                      </div>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => toggleReadState(event, e)}
+                      >
+                        {event.is_read ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
                   </div>
                 ))

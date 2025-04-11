@@ -148,13 +148,32 @@ export default function EventDetails({ event, onClose }: EventDetailsProps) {
                   tickFormatter={(timestamp) =>
                     format(new Date(timestamp), "HH:mm:ss")
                   }
+                  stroke="hsl(var(--muted-foreground))"
                 />
-                <YAxis tickFormatter={formatYAxisTick} />
+                <YAxis
+                  tickFormatter={formatYAxisTick}
+                  stroke="hsl(var(--muted-foreground))"
+                />
                 <Tooltip
                   labelFormatter={(timestamp) =>
                     format(new Date(timestamp), "HH:mm:ss")
                   }
                   formatter={(value: number) => [value.toFixed(2), "Value"]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--background))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "6px",
+                    padding: "8px 12px",
+                  }}
+                  itemStyle={{
+                    color: "hsl(var(--foreground))",
+                    fontSize: "12px",
+                  }}
+                  labelStyle={{
+                    color: "hsl(var(--muted-foreground))",
+                    fontSize: "12px",
+                    marginBottom: "4px",
+                  }}
                 />
                 <Line
                   type="monotone"
@@ -167,8 +186,10 @@ export default function EventDetails({ event, onClose }: EventDetailsProps) {
                   x1={event.start_time}
                   x2={event.end_time}
                   fill="hsl(var(--primary))"
-                  fillOpacity={0.1}
-                  strokeOpacity={0.3}
+                  fillOpacity={0.15}
+                  strokeOpacity={0.5}
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={1}
                 />
               </LineChart>
             </ResponsiveContainer>
