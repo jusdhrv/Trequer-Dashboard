@@ -186,14 +186,37 @@ export default function InboxPage() {
     setSelectedEvent(event);
   };
 
-  const handleEditSave = (updatedEvent: any) => {
-    setEvents((prev) =>
-      prev.map((event) =>
-        event.id === updatedEvent.id ? { ...event, ...updatedEvent } : event
-      )
-    );
-    if (selectedEvent?.id === updatedEvent.id) {
-      setSelectedEvent({ ...selectedEvent, ...updatedEvent });
+  const handleEditSave = async (updatedEvent: any) => {
+    try {
+      // Update in database
+      const { error } = await supabase
+        .from("sensor_events")
+        .update(updatedEvent)
+        .eq("id", updatedEvent.id);
+
+      if (error) throw error;
+
+      // Refresh events list
+      const { data: freshEvents, error: fetchError } = await supabase
+        .from("sensor_events")
+        .select("*")
+        .order("start_time", { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      setEvents(freshEvents);
+      setSelectedEvent(updatedEvent); // Update selected event view
+      setEditingEvent(null);
+      toast({
+        title: "Event updated",
+        description: "The event details have been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update event. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

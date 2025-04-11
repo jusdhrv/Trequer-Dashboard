@@ -41,38 +41,39 @@ export default function EventDetails({ event, onClose }: EventDetailsProps) {
   );
 
   useEffect(() => {
-    fetchEventData();
-  }, [event.id]);
-
-  const fetchEventData = async () => {
-    try {
-      // Fetch data for 5 minutes before and after the event
+    const fetchData = async () => {
+      // Calculate padding based on event duration
       const startTime = new Date(event.start_time);
       const endTime = new Date(event.end_time);
-      const queryStartTime = new Date(startTime.getTime() - 5 * 60000);
-      const queryEndTime = new Date(endTime.getTime() + 5 * 60000);
+      const eventDuration = endTime.getTime() - startTime.getTime();
+      const paddingTime = eventDuration * 0.15; // 15% padding on each side to make event ~70% of view
 
-      const { data: readings, error } = await supabase
-        .from("sensor_readings")
+      const paddedStartTime = new Date(startTime.getTime() - paddingTime);
+      const paddedEndTime = new Date(endTime.getTime() + paddingTime);
+
+      const { data: sensorData, error } = await supabase
+        .from("sensor_data")
         .select("*")
         .eq("sensor_id", event.sensor_id)
-        .gte("timestamp", queryStartTime.toISOString())
-        .lte("timestamp", queryEndTime.toISOString())
+        .gte("timestamp", paddedStartTime.toISOString())
+        .lte("timestamp", paddedEndTime.toISOString())
         .order("timestamp", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load sensor data",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      setData(readings || []);
+      setData(sensorData || []);
       setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching event data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load event data",
-        variant: "destructive",
-      });
-    }
-  };
+    };
+
+    fetchData();
+  }, [event]);
 
   const getEventIcon = (category: string) => {
     switch (category) {
@@ -138,56 +139,38 @@ export default function EventDetails({ event, onClose }: EventDetailsProps) {
           </Button>
         </div>
 
-        <div className="h-[200px] mt-4">
+        <div className="h-[300px] mt-4">
           {data.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="timestamp"
-                  tickFormatter={(timestamp) =>
-                    format(new Date(timestamp), "HH:mm:ss")
-                  }
-                  stroke="hsl(var(--muted-foreground))"
+                  tickFormatter={(time) => format(new Date(time), "HH:mm:ss")}
+                  fontSize={12}
                 />
-                <YAxis
-                  tickFormatter={formatYAxisTick}
-                  stroke="hsl(var(--muted-foreground))"
-                />
+                <YAxis fontSize={12} />
                 <Tooltip
-                  labelFormatter={(timestamp) =>
-                    format(new Date(timestamp), "HH:mm:ss")
-                  }
-                  formatter={(value: number) => [value.toFixed(2), "Value"]}
                   contentStyle={{
                     backgroundColor: "hsl(var(--background))",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "6px",
-                    padding: "8px 12px",
                   }}
-                  itemStyle={{
-                    color: "hsl(var(--foreground))",
-                    fontSize: "12px",
-                  }}
-                  labelStyle={{
-                    color: "hsl(var(--muted-foreground))",
-                    fontSize: "12px",
-                    marginBottom: "4px",
-                  }}
+                  labelStyle={{ color: "hsl(var(--foreground))" }}
                 />
                 <Line
                   type="monotone"
                   dataKey="value"
                   stroke="hsl(var(--primary))"
                   dot={false}
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                 />
                 <ReferenceArea
                   x1={event.start_time}
                   x2={event.end_time}
                   fill="hsl(var(--primary))"
                   fillOpacity={0.15}
-                  strokeOpacity={0.5}
+                  strokeOpacity={1}
                   stroke="hsl(var(--primary))"
                   strokeWidth={1}
                 />
