@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import {
+  createClient,
+  SupabaseClient,
+  RealtimeChannel,
+} from "@supabase/supabase-js";
 import { cn } from "../lib/utils";
+import { Badge } from "./ui/badge";
+import { toast } from "./ui/use-toast";
 import {
   LayoutDashboard,
   Inbox,
@@ -13,31 +19,60 @@ import {
   Activity,
 } from "lucide-react";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
 
 export function Sidebar() {
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const fetchUnreadCount = useCallback(
+    async (retryAttempt = 0) => {
+      try {
+        const { count, error } = await supabase
+          .from("sensor_events")
+          .select("*", { count: "exact", head: true })
+          .eq("is_read", false);
+
+        if (error) throw error;
+
+        if (count !== null) {
+          setUnreadCount(count);
+          setRetryCount(0); // Reset retry count on success
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+
+        if (retryAttempt < MAX_RETRIES) {
+          setTimeout(() => {
+            fetchUnreadCount(retryAttempt + 1);
+          }, RETRY_DELAY * Math.pow(2, retryAttempt)); // Exponential backoff
+        } else {
+          setRetryCount(retryAttempt);
+          toast({
+            title: "Error",
+            description:
+              "Failed to fetch unread messages. Please refresh the page.",
+            variant: "destructive",
+          });
+        }
+      }
+    },
+    [supabase]
+  );
 
   useEffect(() => {
-    const fetchUnreadCount = async () => {
-      const { count, error } = await supabase
-        .from("sensor_events")
-        .select("*", { count: "exact", head: true })
-        .eq("is_read", false);
-
-      if (!error && count !== null) {
-        setUnreadCount(count);
-      }
-    };
-
     fetchUnreadCount();
 
     // Subscribe to changes
-    const channel = supabase
+    const newChannel = supabase
       .channel("events_changes")
       .on(
         "postgres_changes",
@@ -50,12 +85,25 @@ export function Sidebar() {
           fetchUnreadCount();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          setChannel(newChannel);
+        } else {
+          console.error("Failed to subscribe to changes");
+          toast({
+            title: "Connection Error",
+            description: "Failed to subscribe to real-time updates",
+            variant: "destructive",
+          });
+        }
+      });
 
     return () => {
-      channel.unsubscribe();
+      if (channel) {
+        channel.unsubscribe();
+      }
     };
-  }, []);
+  }, [fetchUnreadCount]);
 
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-background border-r border-border">

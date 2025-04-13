@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import {
   LineChart,
   Line,
@@ -17,6 +17,13 @@ import { AlertTriangle, Clock, XCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
 
+interface SensorData {
+  id: string;
+  sensor_id: string;
+  timestamp: string;
+  value: number;
+}
+
 interface EventDetailsProps {
   event: {
     id: string;
@@ -33,47 +40,66 @@ interface EventDetailsProps {
 }
 
 export default function EventDetails({ event, onClose }: EventDetailsProps) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<SensorData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
-      // Calculate padding based on event duration
-      const startTime = new Date(event.start_time);
-      const endTime = new Date(event.end_time);
-      const eventDuration = endTime.getTime() - startTime.getTime();
-      const paddingTime = eventDuration * 0.15; // 15% padding on each side to make event ~70% of view
+      try {
+        setError(null);
+        // Calculate padding based on event duration
+        const startTime = new Date(event.start_time);
+        const endTime = new Date(event.end_time);
+        const eventDuration = endTime.getTime() - startTime.getTime();
+        const paddingTime = eventDuration * 0.15; // 15% padding on each side to make event ~70% of view
 
-      const paddedStartTime = new Date(startTime.getTime() - paddingTime);
-      const paddedEndTime = new Date(endTime.getTime() + paddingTime);
+        const paddedStartTime = new Date(startTime.getTime() - paddingTime);
+        const paddedEndTime = new Date(endTime.getTime() + paddingTime);
 
-      const { data: sensorData, error } = await supabase
-        .from("sensor_data")
-        .select("*")
-        .eq("sensor_id", event.sensor_id)
-        .gte("timestamp", paddedStartTime.toISOString())
-        .lte("timestamp", paddedEndTime.toISOString())
-        .order("timestamp", { ascending: true });
+        const { data: sensorData, error } = await supabase
+          .from("sensor_data")
+          .select("*")
+          .eq("sensor_id", event.sensor_id)
+          .gte("timestamp", paddedStartTime.toISOString())
+          .lte("timestamp", paddedEndTime.toISOString())
+          .order("timestamp", { ascending: true });
 
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load sensor data",
-          variant: "destructive",
-        });
-        return;
+        if (error) throw error;
+
+        if (isMounted) {
+          setData(sensorData || []);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "Failed to load sensor data"
+          );
+          toast({
+            title: "Error",
+            description: "Failed to load sensor data. Please try again later.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+        }
       }
-
-      setData(sensorData || []);
-      setIsLoading(false);
     };
 
     fetchData();
-  }, [event]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [event, supabase]);
 
   const getEventIcon = (category: string) => {
     switch (category) {
@@ -101,16 +127,32 @@ export default function EventDetails({ event, onClose }: EventDetailsProps) {
     }
   };
 
-  const formatYAxisTick = (value: number) => {
-    return value.toFixed(2);
-  };
-
   if (isLoading) {
     return (
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <AlertTriangle className="h-8 w-8 text-destructive" />
+            <p className="text-sm text-muted-foreground">Failed to load data</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
           </div>
         </CardContent>
       </Card>
