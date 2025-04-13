@@ -1,35 +1,27 @@
-import fs from 'fs'
-import path from 'path'
-import { subHours } from 'date-fns'
-
-const DATA_PATH = path.join(process.cwd(), 'data', 'sensor_readings.json')
+import { supabase } from './supabase'
 
 export async function purgeOldData() {
     try {
-        // Read the current data
-        const data = await fs.promises.readFile(DATA_PATH, 'utf8')
-        const jsonData = JSON.parse(data)
+        // Get both retention periods from settings
+        const { data: settings, error: settingsError } = await supabase
+            .from('settings')
+            .select('key, value')
+            .in('key', ['sensor_readings_retention_hours', 'diagnostic_readings_retention_hours'])
 
-        // Get retention period
-        const retentionPeriod = jsonData.retentionPeriod || '168h' // Default to 7 days
-        const retentionHours = parseInt(retentionPeriod.replace('h', ''))
+        if (settingsError) throw settingsError
 
-        // Calculate cutoff date
-        const cutoffDate = subHours(new Date(), retentionHours)
+        // Default to 7 days (168h) for sensor data and 3 days (72h) for diagnostic data if not found
+        const sensorRetentionHours = settings?.find(s => s.key === 'sensor_readings_retention_hours')?.value ?? 168
+        const diagnosticRetentionHours = settings?.find(s => s.key === 'diagnostic_readings_retention_hours')?.value ?? 72
 
-        // Filter out old readings
-        const filteredReadings = jsonData.readings.filter((reading: any) => {
-            const readingDate = new Date(reading.timestamp)
-            return readingDate >= cutoffDate
+        // Call the database function to purge old data
+        const { error } = await supabase.rpc('purge_old_data', {
+            sensor_retention_hours: sensorRetentionHours,
+            diagnostic_retention_hours: diagnosticRetentionHours
         })
 
-        // Update the data with filtered readings
-        jsonData.readings = filteredReadings
+        if (error) throw error
 
-        // Write back to file
-        await fs.promises.writeFile(DATA_PATH, JSON.stringify(jsonData, null, 2), 'utf8')
-
-        // console.log(`Data purge complete. Removed readings older than ${retentionHours} hours.`)
         return true
     } catch (error) {
         console.error('Error purging old data:', error)
