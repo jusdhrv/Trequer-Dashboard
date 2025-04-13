@@ -1,4 +1,4 @@
-# Documentation Improvements - March 2024
+# Documentation Improvements
 
 ## Overview
 
