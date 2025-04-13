@@ -8,9 +8,9 @@ import {
   SupabaseClient,
   RealtimeChannel,
 } from "@supabase/supabase-js";
-import { cn } from "../lib/utils";
-import { Badge } from "./ui/badge";
-import { toast } from "./ui/use-toast";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
 import {
   LayoutDashboard,
   Inbox,
