@@ -14,7 +14,7 @@ export interface SensorConfig {
 export async function getSensorConfigs(): Promise<SensorConfig[]> {
     try {
         const { data, error } = await supabase
-            .from('sensors')
+            .from('sensor_configs')
             .select('*')
             .order('name')
 
@@ -41,7 +41,7 @@ export async function getSensorConfigs(): Promise<SensorConfig[]> {
 export async function updateSensorConfig(config: SensorConfig): Promise<boolean> {
     try {
         const { error } = await supabase
-            .from('sensors')
+            .from('sensor_configs')
             .update({
                 name: config.name,
                 unit: config.unit,
@@ -68,7 +68,7 @@ export async function addSensorConfig(config: Omit<SensorConfig, 'id'>): Promise
     try {
         const newId = crypto.randomUUID()
         const { error } = await supabase
-            .from('sensors')
+            .from('sensor_configs')
             .insert({
                 id: newId,
                 name: config.name,
@@ -94,7 +94,7 @@ export async function addSensorConfig(config: Omit<SensorConfig, 'id'>): Promise
 export async function deleteSensorConfig(id: string): Promise<boolean> {
     try {
         const { error } = await supabase
-            .from('sensors')
+            .from('sensor_configs')
             .delete()
             .eq('id', id)
 
