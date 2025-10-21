@@ -56,25 +56,27 @@ export default function HomePage() {
           <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight drop-shadow-lg">
             Project Trequer
           </h1>
-          <div className="text-xl md:text-2xl text-white/90 font-medium drop-shadow-md">
-            <span className="block">An</span>
-            <div className="adjective-carousel">
-              {adjectives.map((adjective, index) => (
-                <span
-                  key={adjective}
-                  className={`adjective-item ${
-                    index === currentAdjective
-                      ? "active"
-                      : index < currentAdjective
-                      ? "exiting"
-                      : "entering"
-                  }`}
-                >
-                  {adjective}
-                </span>
-              ))}
+          <div className="text-xl md:text-2xl text-white/90 font-medium drop-shadow-md italic">
+            <div className="flex flex-wrap items-center justify-center gap-1">
+              <span>An</span>
+              <div className="adjective-carousel">
+                {adjectives.map((adjective, index) => (
+                  <span
+                    key={adjective}
+                    className={`adjective-item font-bold underline ${
+                      index === currentAdjective
+                        ? "active"
+                        : index < currentAdjective
+                        ? "exiting"
+                        : "entering"
+                    }`}
+                  >
+                    {adjective}
+                  </span>
+                ))}
+              </div>
+              <span>Space Rover</span>
             </div>
-            <span className="block">Space Rover</span>
           </div>
         </div>
 
