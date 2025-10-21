@@ -2,6 +2,7 @@
 
 import { Button } from "../components/ui/button";
 import { useRouter } from "next/navigation";
+import { LayoutDashboard, ExternalLink } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function HomePage() {
 
   const handleContributeClick = () => {
     window.open(
-      "https://github.com/jusdhrv/Trequer-Dashboard?tab=contributing-ov-file#",
+      "https://github.com/jusdhrv/Trequer-Dashboard?tab=contributing-ov-file#contributing-to-trequer-dashboard",
       "_blank"
     );
   };
@@ -26,7 +27,7 @@ export default function HomePage() {
             Project Trequer
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground font-medium">
-            Agile rover
+            An Agile, All-Terrain, Cost-Effective, Easy-to-Use Space Rover
           </p>
         </div>
 
@@ -37,6 +38,7 @@ export default function HomePage() {
             size="lg"
             className="w-full sm:w-auto px-8 py-3 text-lg font-medium"
           >
+            <LayoutDashboard className="mr-2 h-5 w-5" />
             Dashboard
           </Button>
           <Button
@@ -45,6 +47,7 @@ export default function HomePage() {
             size="lg"
             className="w-full sm:w-auto px-8 py-3 text-lg font-medium"
           >
+            <ExternalLink className="mr-2 h-5 w-5" />
             Contribute
           </Button>
         </div>
