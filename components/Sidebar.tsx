@@ -17,6 +17,7 @@ import {
   Database,
   Settings,
   Activity,
+  Home,
 } from "lucide-react";
 
 const MAX_RETRIES = 3;
@@ -108,8 +109,13 @@ export function Sidebar() {
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-background border-r border-border">
       <div className="px-3 py-2 flex-1">
-        <Link href="/dashboard" className="flex items-center pl-3 mb-14">
-          <h1 className="text-2xl font-bold text-foreground">Trequer</h1>
+        <Link 
+          href="/" 
+          className="flex items-center pl-3 mb-14 hover:bg-accent rounded-lg transition-colors p-2 -ml-2 group"
+          aria-label="Return to homepage"
+        >
+          <Home className="h-5 w-5 mr-2 text-foreground group-hover:text-primary transition-colors" />
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground group-hover:text-primary transition-colors">Trequer</h1>
         </Link>
         <div className="space-y-1">
           <Link
