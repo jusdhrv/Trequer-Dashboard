@@ -3,14 +3,40 @@
 import { Button } from "../components/ui/button";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, ExternalLink } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function HomePage() {
   const router = useRouter();
   const [currentAdjective, setCurrentAdjective] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [carouselWidth, setCarouselWidth] = useState(0);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const adjectives = ["Agile", "All-Terrain", "Cost-Effective", "Easy-to-Use"];
+
+  // Function to measure text width
+  const measureTextWidth = (text: string) => {
+    if (!measureRef.current) return 0;
+    
+    // Create a temporary span to measure text width
+    const tempSpan = document.createElement('span');
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.position = 'absolute';
+    tempSpan.style.whiteSpace = 'nowrap';
+    tempSpan.style.fontSize = window.getComputedStyle(measureRef.current).fontSize;
+    tempSpan.style.fontFamily = window.getComputedStyle(measureRef.current).fontFamily;
+    tempSpan.style.fontWeight = window.getComputedStyle(measureRef.current).fontWeight;
+    tempSpan.style.fontStyle = window.getComputedStyle(measureRef.current).fontStyle;
+    tempSpan.style.textDecoration = window.getComputedStyle(measureRef.current).textDecoration;
+    tempSpan.textContent = text;
+    
+    document.body.appendChild(tempSpan);
+    const width = tempSpan.offsetWidth;
+    document.body.removeChild(tempSpan);
+    
+    return width;
+  };
 
   const handleDashboardClick = () => {
     router.push("/dashboard");
@@ -22,6 +48,22 @@ export default function HomePage() {
       "_blank"
     );
   };
+
+  // Initialize carousel width on mount
+  useEffect(() => {
+    if (measureRef.current) {
+      const initialWidth = measureTextWidth(adjectives[currentAdjective]);
+      setCarouselWidth(initialWidth);
+    }
+  }, []);
+
+  // Update carousel width when adjective changes
+  useEffect(() => {
+    if (measureRef.current) {
+      const newWidth = measureTextWidth(adjectives[currentAdjective]);
+      setCarouselWidth(newWidth);
+    }
+  }, [currentAdjective]);
 
   // Animated carousel effect
   useEffect(() => {
@@ -59,7 +101,11 @@ export default function HomePage() {
           <div className="text-xl md:text-2xl text-white/90 font-medium drop-shadow-md italic">
             <div className="flex flex-wrap items-center justify-center gap-1">
               <span>An</span>
-              <div className="adjective-carousel">
+              <div 
+                ref={carouselRef}
+                className="adjective-carousel"
+                style={{ width: carouselWidth > 0 ? `${carouselWidth}px` : 'auto' }}
+              >
                 {adjectives.map((adjective, index) => (
                   <span
                     key={adjective}
@@ -76,6 +122,19 @@ export default function HomePage() {
                 ))}
               </div>
               <span>Space Rover</span>
+              {/* Hidden span for measuring text width */}
+              <span 
+                ref={measureRef}
+                className="font-bold underline italic text-xl md:text-2xl"
+                style={{ 
+                  position: 'absolute', 
+                  visibility: 'hidden', 
+                  whiteSpace: 'nowrap',
+                  pointerEvents: 'none'
+                }}
+              >
+                {adjectives[currentAdjective]}
+              </span>
             </div>
           </div>
         </div>

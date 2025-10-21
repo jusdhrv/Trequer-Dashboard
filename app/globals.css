@@ -111,7 +111,7 @@ body {
     height: 1.5em;
     display: inline-block;
     vertical-align: middle;
-    min-width: 8rem;
+    transition: width 0.5s ease-in-out;
   }
 
   .adjective-item {
@@ -163,7 +163,6 @@ body {
   @media (max-width: 768px) {
     .adjective-carousel {
       height: 1.2em;
-      min-width: 6rem;
     }
   }
 
