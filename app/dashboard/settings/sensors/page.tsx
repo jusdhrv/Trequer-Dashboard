@@ -168,12 +168,12 @@ export default function SensorSettingsPage() {
     }
 
     return (
-        <div className="p-4">
+        <div className="p-4 sm:p-6 lg:p-8">
             <Card>
                 <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <CardTitle>Sensor Settings</CardTitle>
-                        <Button onClick={handleAdd} disabled={isLoading}>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <CardTitle className="text-xl sm:text-2xl">Sensor Settings</CardTitle>
+                        <Button onClick={handleAdd} disabled={isLoading} className="w-full sm:w-auto">
                             <Plus className="mr-2 h-4 w-4" />
                             Add Sensor
                         </Button>
@@ -189,7 +189,7 @@ export default function SensorSettingsPage() {
                                             <div className="flex-1 grid gap-2">
                                                 {editingId === sensor.id ? (
                                                     <>
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <div className="space-y-2">
                                                                 <Label>Name</Label>
                                                                 <Input
@@ -254,7 +254,7 @@ export default function SensorSettingsPage() {
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <div className="grid grid-cols-2 gap-4">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                         <div>
                                                             <Label className="font-bold">{sensor.name}</Label>
                                                             <p className="text-sm text-muted-foreground">{sensor.description}</p>

@@ -94,10 +94,10 @@ export default function EventSettingsPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Event Detection Settings</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Event Detection Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">

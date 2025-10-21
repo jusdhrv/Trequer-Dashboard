@@ -176,15 +176,15 @@ const RawDataPage = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 sm:p-6 lg:p-8">
       <Card>
         <CardHeader>
           <CardTitle>
-            <h1 className="text-2xl font-bold mb-4">Data Export</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">Data Export</h1>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid w-full items-center gap-4">
+          <div className="grid w-full items-center gap-4 sm:gap-6">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="sensorSelect">Select Sensor</Label>
               <Select value={selectedSensor} onValueChange={setSelectedSensor}>
@@ -214,7 +214,7 @@ const RawDataPage = () => {
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="timeScaleSelect">Select Time Scale</Label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Select value={timeScale} onValueChange={setTimeScale}>
                   <SelectTrigger id="timeScaleSelect" className="flex-1">
                     <SelectValue placeholder="Select time scale" />
@@ -232,6 +232,8 @@ const RawDataPage = () => {
                   size="icon"
                   onClick={fetchData}
                   disabled={isLoading || !dateRange || !selectedSensor}
+                  className="w-full sm:w-auto"
+                  aria-label="Refresh data"
                 >
                   <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
                 </Button>

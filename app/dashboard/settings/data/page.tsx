@@ -174,16 +174,16 @@ export default function DataSettingsPage() {
     selectedDiagnosticPeriod !== diagnosticRetentionPeriod;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Sensor Data Settings</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Sensor Data Settings</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="space-y-2">
               <Label htmlFor="sensorRetentionPeriod">Retention Period</Label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="flex-1">
                   <Select
                     value={selectedSensorPeriod ?? undefined}
@@ -204,6 +204,7 @@ export default function DataSettingsPage() {
                 <Button
                   onClick={() => handleSave("sensor")}
                   disabled={!sensorHasChanges}
+                  className="w-full sm:w-auto"
                 >
                   Save
                 </Button>
@@ -220,7 +221,7 @@ export default function DataSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Diagnostic Data Settings</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Diagnostic Data Settings</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">

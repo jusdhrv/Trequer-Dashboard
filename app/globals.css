@@ -108,7 +108,10 @@ body {
   .adjective-carousel {
     position: relative;
     overflow: hidden;
-    height: 2.5rem;
+    height: 1.5em;
+    display: inline-block;
+    vertical-align: middle;
+    min-width: 8rem;
   }
 
   .adjective-item {
@@ -122,6 +125,7 @@ body {
     justify-content: center;
     transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
     will-change: transform, opacity;
+    white-space: nowrap;
   }
 
   .adjective-item.entering {
@@ -158,7 +162,60 @@ body {
   /* Mobile optimizations */
   @media (max-width: 768px) {
     .adjective-carousel {
-      height: 2rem;
+      height: 1.2em;
+      min-width: 6rem;
+    }
+  }
+
+  /* Dashboard responsive improvements */
+  .dashboard-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .dashboard-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dashboard-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .dashboard-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Touch-friendly button sizing for mobile */
+  @media (max-width: 640px) {
+    .touch-button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Improved focus states */
+  .focus-visible:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion support for dashboard animations */
+  @media (prefers-reduced-motion: reduce) {
+    .dashboard-transition {
+      transition: none !important;
+    }
+
+    .chart-animation {
+      animation: none !important;
     }
   }
 }

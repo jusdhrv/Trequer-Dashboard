@@ -186,8 +186,8 @@ export default function DiagnosticsPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
         <div className="flex items-center gap-4">
           <Label htmlFor="timeRange">Time Range</Label>
           <Select value={timeRange} onValueChange={setTimeRange}>

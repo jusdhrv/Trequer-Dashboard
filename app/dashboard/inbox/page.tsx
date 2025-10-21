@@ -269,7 +269,7 @@ export default function InboxPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {selectedEvent && (
         <EventDetails
           event={selectedEvent}
@@ -285,11 +285,11 @@ export default function InboxPage() {
         />
       )}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle>Event Inbox</CardTitle>
-          <div className="flex items-center space-x-2">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-2">
+          <CardTitle className="text-xl sm:text-2xl">Event Inbox</CardTitle>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
             <Select value={readFilter} onValueChange={setReadFilter}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -299,7 +299,7 @@ export default function InboxPage() {
               </SelectContent>
             </Select>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>

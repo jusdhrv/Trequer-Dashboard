@@ -22,10 +22,10 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
 
   return (
-    <div className="p-4">
+    <div className="p-4 sm:p-6 lg:p-8">
       <Card>
         <CardHeader>
-          <CardTitle>Settings</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Settings</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs
@@ -33,7 +33,7 @@ export default function SettingsPage() {
             onValueChange={setActiveTab}
             className="space-y-4"
           >
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 General
