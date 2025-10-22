@@ -13,7 +13,7 @@ export default function HomePage() {
   const measureRef = useRef<HTMLSpanElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  const adjectives = ["Agile", "All-Terrain", "Cost-Effective", "Easy-to-Use", "Modern", "Adaptable", "Scalable", "Open-Source"];
+  const adjectives = ["An Agile", "An All-Terrain", "A Cost-Effective", "An Easy-to-Use", "A Modern", "An Adaptable", "A Scalable", "An Open-Source"];
 
   // Function to measure text width
   const measureTextWidth = (text: string) => {
@@ -100,7 +100,6 @@ export default function HomePage() {
           </h1>
           <div className="text-xl md:text-2xl text-white/90 font-medium drop-shadow-md italic">
             <div className="flex flex-wrap items-center justify-center gap-1">
-              <span>An</span>
               <div
                 ref={carouselRef}
                 className="adjective-carousel"
