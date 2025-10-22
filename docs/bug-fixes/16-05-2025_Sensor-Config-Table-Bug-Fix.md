@@ -32,7 +32,7 @@ export async function updateSensorConfig(config: SensorConfig): Promise<boolean>
                 name: config.name,
                 unit: config.unit,
                 pin: config.pin,
-                signal_type: config.signalType,
+                signal_type: config.signal_type,
                 reading_interval: config.readingInterval,
                 is_enabled: config.is_enabled,
                 description: config.description,
