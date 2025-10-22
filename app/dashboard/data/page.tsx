@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useJsonZipExport } from '@/hooks/useJsonZipExport'
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Label } from "../../../components/ui/label"
@@ -39,6 +40,8 @@ const RawDataPage = () => {
   const [timeScale, setTimeScale] = useState('minutes')
   const [isLoading, setIsLoading] = useState(false)
   const [isClient, setIsClient] = useState(false)
+
+  const { compressAndDownload } = useJsonZipExport()
 
   useEffect(() => {
     fetchSensors()
@@ -143,32 +146,88 @@ const RawDataPage = () => {
     }
   }
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!dateRange?.from || !dateRange?.to) return
 
     const selectedSensorConfig = sensors.find(s => s.id === selectedSensor)
     if (!selectedSensorConfig) return
 
-    if (rawData.length === 0) {
-      // Export a message if no data is available
-      const dataStr = JSON.stringify({ message: "No valid data for the selected time range" }, null, 2)
-      const dataBlob = new Blob([dataStr], { type: 'application/json' })
-      const url = URL.createObjectURL(dataBlob)
-      const link = document.createElement('a')
-      link.download = `${selectedSensorConfig.name}_no_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
-      link.href = url
-      link.click()
-      return
-    }
+    // Add loading state for export operation
+    setIsLoading(true)
 
-    const dataStr = JSON.stringify(rawData, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.download = `${selectedSensorConfig.name}_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}.json`
-    link.href = url
-    link.click()
+    try {
+      // Handle empty data case
+      if (rawData.length === 0) {
+        const emptyData = {
+          message: "No valid data for the selected time range",
+          timestamp: dateRange.from.toISOString(),
+          selectedSensor: selectedSensorConfig.name
+        }
+
+        // Use the hook for consistent compression even for empty data
+        await compressAndDownload({
+          jsonData: emptyData,
+          filename: `${selectedSensorConfig.name}_no_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}`
+        })
+        return
+      }
+
+      // Prepare metadata for the actual data export
+      const exportData = {
+        metadata: {
+          sensor: selectedSensorConfig,
+          timeRange: {
+            from: dateRange.from.toISOString(),
+            to: dateRange.to.toISOString(),
+            duration: differenceInSeconds(dateRange.to, dateRange.from),
+            timeScale: timeScale
+          },
+          exportConfig: {
+            dataPoints: rawData.length,
+            processedAt: new Date().toISOString()
+          }
+        },
+        data: rawData // Your existing processed data
+      }
+
+      // Use the compression hook
+      await compressAndDownload({
+        jsonData: exportData,
+        filename: `${selectedSensorConfig.name}_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}`
+      })
+
+      // Success feedback
+      toast({
+        title: "Export Successful",
+        description: `Data exported as ZIP (${rawData.length} data points)`,
+      })
+
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast({
+        title: "Export Failed",
+        description: "Please try again or check console for details",
+        variant: "destructive",
+      })
+
+      // Fallback to raw JSON if compression fails (hook's built-in fallback will handle this too)
+      const fallbackDataStr = JSON.stringify(rawData.length === 0
+        ? { message: "No valid data for the selected time range" }
+        : rawData, null, 2)
+
+      const fallbackBlob = new Blob([fallbackDataStr], { type: 'application/json' })
+      const fallbackUrl = URL.createObjectURL(fallbackBlob)
+      const fallbackLink = document.createElement('a')
+      fallbackLink.download = `${selectedSensorConfig?.name || 'data'}_fallback.json`
+      fallbackLink.href = fallbackUrl
+      fallbackLink.click()
+      URL.revokeObjectURL(fallbackUrl)
+
+    } finally {
+      setIsLoading(false) // Always reset loading state
+    }
   }
+
 
   // Don't render until after client-side hydration
   if (!isClient) {
@@ -257,9 +316,14 @@ const RawDataPage = () => {
                 )}
               </div>
             </div>
-            <Button onClick={handleExport} disabled={isLoading || !dateRange || !selectedSensor}>
-              Export Data
+            <Button
+              onClick={handleExport}
+              disabled={isLoading || !dateRange || !selectedSensor}
+              className={cn("w-full", isLoading && "animate-pulse")}
+            >
+              {isLoading ? "Compressing..." : "Export as ZIP"}
             </Button>
+
           </div>
         </CardContent>
       </Card>
