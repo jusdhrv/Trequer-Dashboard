@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import GraphWidget from "../../components/GraphWidget"
@@ -15,39 +15,49 @@ export default function DashboardPage() {
   const [graphs, setGraphs] = useState<Array<{ id: string; sensorType: string }>>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [screenDimensions, setScreenDimensions] = useState({ width: 0, height: 0 })
+  const dashboardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchSensorConfigs()
+    updateScreenDimensions()
+
+    const handleResize = () => updateScreenDimensions()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  const updateScreenDimensions = () => {
+    if (dashboardRef.current) {
+      const rect = dashboardRef.current.getBoundingClientRect()
+      setScreenDimensions({
+        width: rect.width,
+        height: rect.height
+      })
+    }
+  }
 
   const fetchSensorConfigs = async () => {
     try {
-      // console.log('Fetching sensor configurations...')
       const response = await fetch('/api/sensors/config')
       const data = await response.json()
-      
-      // console.log('API Response:', data)
 
       if (data.error) {
         throw new Error(data.error)
       }
 
       if (data.configs) {
-        // console.log('Received sensor configs:', data.configs)
         setSensorConfigs(data.configs)
-        
-        // Initialize graphs for each enabled sensor
+
         const enabledGraphs = data.configs
           .filter((config: SensorConfig) => config.is_enabled)
           .map((config: SensorConfig) => ({
             id: `graph_${config.id}`,
             sensorType: config.id
           }))
-        
-        // console.log('Setting up graphs for enabled sensors:', enabledGraphs)
+
         setGraphs(enabledGraphs)
       } else {
-        // console.log('No sensor configs found in response:', data)
         toast({
           title: "Warning",
           description: "No sensor configurations found",
@@ -82,12 +92,10 @@ export default function DashboardPage() {
       sensorType: enabledSensors[0].id
     }
 
-    // console.log('Adding new graph:', newGraph)
     setGraphs(prev => [...prev, newGraph])
   }
 
   const handleDeleteGraph = (graphId: string) => {
-    // console.log('Deleting graph:', graphId)
     setGraphs(prev => prev.filter(graph => graph.id !== graphId))
   }
 
@@ -98,9 +106,38 @@ export default function DashboardPage() {
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
 
-    // console.log('Reordering graphs:', items)
     setGraphs(items)
   }
+
+  // Calculate optimal card dimensions
+  const calculateCardDimensions = () => {
+    const { width, height } = screenDimensions
+    const headerHeight = 120 // Approximate header height
+    const padding = 32 // Total padding
+    const gap = 24 // Gap between cards
+
+    const availableHeight = height - headerHeight - padding
+    const availableWidth = width - padding
+
+    // Calculate grid layout
+    const totalCards = graphs.length + 1 // +1 for video widget
+    const cols = Math.ceil(Math.sqrt(totalCards))
+    const rows = Math.ceil(totalCards / cols)
+
+    // Calculate card dimensions
+    const cardWidth = Math.floor((availableWidth - (gap * (cols - 1))) / cols)
+    const cardHeight = Math.floor((availableHeight - (gap * (rows - 1))) / rows)
+
+    return {
+      // Give each card a minimum width and height in a 16x10 ratio
+      cardWidth: Math.max(cardWidth, 320), // Minimum width
+      cardHeight: Math.max(cardHeight, 200), // Minimum height
+      cols,
+      rows
+    }
+  }
+
+  const { cardWidth, cardHeight, cols } = calculateCardDimensions()
 
   if (isLoading) {
     return (
@@ -111,12 +148,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
+    <div
+      ref={dashboardRef}
+      className="h-screen w-full p-4 overflow-hidden"
+      style={{ height: '100vh' }}
+    >
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Dashboard</h1>
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            onClick={() => setIsEditing(!isEditing)} 
+          <Button
+            onClick={() => setIsEditing(!isEditing)}
             variant="outline"
             className="w-full sm:w-auto"
             aria-label={isEditing ? 'Finish editing layout' : 'Edit dashboard layout'}
@@ -124,7 +166,7 @@ export default function DashboardPage() {
             <Pencil className="mr-2 h-4 w-4" />
             {isEditing ? 'Done' : 'Edit Layout'}
           </Button>
-          <Button 
+          <Button
             onClick={handleAddGraph}
             className="w-full sm:w-auto"
             aria-label="Add new graph to dashboard"
@@ -135,39 +177,84 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+      {/* Dynamic Grid */}
+      <div
+        className="grid gap-6 overflow-auto"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          height: `calc(100vh - 120px)`,
+          gridAutoRows: 'minmax(200px, 1fr)'
+        }}
+      >
         {/* Video Card */}
-        <VideoWidget />
+        <div
+          className="relative"
+          style={{
+            minHeight: cardHeight,
+            minWidth: cardWidth
+          }}
+        >
+          <Card className="h-full">
+            <VideoWidget />
+          </Card>
+        </div>
 
         {/* Graph Cards */}
-        {graphs.map((graph, index) => {
-          const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
-          if (!sensor) {
-            // console.log('Could not find sensor config for graph:', graph)
-            return null
-          }
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="dashboard" direction="horizontal">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="contents"
+              >
+                {graphs.map((graph, index) => {
+                  const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
+                  if (!sensor) return null
 
-          return (
-            <Card key={graph.id} className="p-4 relative">
-              {isEditing && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
-                  onClick={() => handleDeleteGraph(graph.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-              <GraphWidget
-                title={`${sensor.name} (${sensor.unit})`}
-                sensorType={sensor.id}
-              />
-            </Card>
-          )
-        })}
+                  return (
+                    <Draggable key={graph.id} draggableId={graph.id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="relative"
+                          style={{
+                            minHeight: cardHeight,
+                            minWidth: cardWidth,
+                            transform: snapshot.isDragging ? 'rotate(5deg)' : 'none'
+                          }}
+                        >
+                          <Card className="h-full p-4 relative">
+                            {isEditing && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
+                                onClick={() => handleDeleteGraph(graph.id)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <div style={{ height: cardHeight - 32 }}>
+                              <GraphWidget
+                                title={`${sensor.name} (${sensor.unit})`}
+                                sensorType={sensor.id}
+                              />
+                            </div>
+                          </Card>
+                        </div>
+                      )}
+                    </Draggable>
+                  )
+                })}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
     </div>
   )
 }
-
