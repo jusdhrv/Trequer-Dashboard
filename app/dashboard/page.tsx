@@ -226,12 +226,16 @@ export default function DashboardPage() {
                     <X className="h-4 w-4" />
                   </Button>
                 )}
-                <div style={{ height: cardHeight - 32 }}>
+                {/* <div style={{ height: cardHeight - 32 }}>
                   <GraphWidget
                     title={`${sensor.name} (${sensor.unit})`}
                     sensorType={sensor.id}
                   />
-                </div>
+                </div> */}
+                <GraphWidget
+                  title={`${sensor.name} (${sensor.unit})`}
+                  sensorType={sensor.id}
+                />
               </Card>
             </div>
           )
