@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { Card } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import GraphWidget from "../../components/GraphWidget"
@@ -20,11 +20,16 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchSensorConfigs()
-    updateScreenDimensions()
+  }, [])
 
-    const handleResize = () => updateScreenDimensions()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+  // Measure synchronously before paint and on any resize of the container
+  useLayoutEffect(() => {
+    if (!dashboardRef.current) return
+    const update = () => updateScreenDimensions()
+    const ro = new ResizeObserver(update)
+    ro.observe(dashboardRef.current)
+    update() // initial measure
+    return () => ro.disconnect()
   }, [])
 
   const updateScreenDimensions = () => {
@@ -190,13 +195,14 @@ export default function DashboardPage() {
       >
         {/* Video Card */}
         <div
+          key={`video-${cardWidth}x${cardHeight}`}
           className="relative"
           style={{
             height: cardHeight,
             width: '100%'
           }}
         >
-          <Card className="h-full">
+          <Card className="h-full overflow-hidden">
             <VideoWidget />
           </Card>
         </div>
@@ -208,14 +214,14 @@ export default function DashboardPage() {
 
           return (
             <div
-              key={graph.id}
+              key={`${graph.id}-${cardWidth}x${cardHeight}`}  // re-mount on size changes
               className="relative"
               style={{
                 height: cardHeight,
                 width: '100%'
               }}
             >
-              <Card className="h-full p-4 relative">
+              <Card className="h-full p-4 relative overflow-hidden">
                 {isEditing && (
                   <Button
                     variant="ghost"
