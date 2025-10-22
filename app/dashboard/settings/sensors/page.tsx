@@ -118,7 +118,7 @@ export default function SensorSettingsPage() {
             name: 'New Sensor',
             unit: '',
             pin: '',
-            signalType: 'analog',
+            signal_type: 'analog',
             readingInterval: 5000,
             is_enabled: true,
             description: ''
@@ -214,8 +214,8 @@ export default function SensorSettingsPage() {
                                                             <div className="space-y-2">
                                                                 <Label>Signal Type</Label>
                                                                 <Select
-                                                                    value={sensor.signalType}
-                                                                    onValueChange={value => handleUpdateField(sensor.id, 'signalType', value)}
+                                                                    value={sensor.signal_type}
+                                                                    onValueChange={value => handleUpdateField(sensor.id, 'signal_type', value)}
                                                                 >
                                                                     <SelectTrigger>
                                                                         <SelectValue />
@@ -267,7 +267,7 @@ export default function SensorSettingsPage() {
                                                                 <span className="font-medium">Pin:</span> {sensor.pin}
                                                             </div>
                                                             <div>
-                                                                <span className="font-medium">Type:</span> {sensor.signalType}
+                                                                <span className="font-medium">Type:</span> {sensor.signal_type}
                                                             </div>
                                                             <div>
                                                                 <span className="font-medium">Interval:</span> {sensor.readingInterval}ms
