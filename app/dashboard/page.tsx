@@ -179,19 +179,21 @@ export default function DashboardPage() {
 
       {/* Dynamic Grid */}
       <div
-        className="grid gap-6 overflow-auto"
+        className="grid gap-6"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           height: `calc(100vh - 120px)`,
-          gridAutoRows: 'minmax(200px, 1fr)'
+          gridAutoRows: 'minmax(200px, 1fr)',
+          maxWidth: '100%',
+          overflow: 'hidden'
         }}
       >
         {/* Video Card */}
         <div
           className="relative"
           style={{
-            minHeight: cardHeight,
-            minWidth: cardWidth
+            height: cardHeight,
+            width: '100%'
           }}
         >
           <Card className="h-full">
@@ -202,20 +204,18 @@ export default function DashboardPage() {
         {/* Graph Cards */}
         {graphs.map((graph, index) => {
           const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
-          if (!sensor) {
-            // console.log('Could not find sensor config for graph:', graph)
-            return null
-          }
+          if (!sensor) return null
 
           return (
             <div
+              key={graph.id}
               className="relative"
               style={{
-                minHeight: cardHeight,
-                minWidth: cardWidth
+                height: cardHeight,
+                width: '100%'
               }}
             >
-              <Card key={graph.id} className="p-4 relative">
+              <Card className="h-full p-4 relative">
                 {isEditing && (
                   <Button
                     variant="ghost"
@@ -226,12 +226,6 @@ export default function DashboardPage() {
                     <X className="h-4 w-4" />
                   </Button>
                 )}
-                {/* <div style={{ height: cardHeight - 32 }}>
-                  <GraphWidget
-                    title={`${sensor.name} (${sensor.unit})`}
-                    sensorType={sensor.id}
-                  />
-                </div> */}
                 <GraphWidget
                   title={`${sensor.name} (${sensor.unit})`}
                   sensorType={sensor.id}
