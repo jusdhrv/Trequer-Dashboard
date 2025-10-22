@@ -200,60 +200,42 @@ export default function DashboardPage() {
         </div>
 
         {/* Graph Cards */}
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="dashboard" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="contents"
-              >
-                {graphs.map((graph, index) => {
-                  const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
-                  if (!sensor) return null
+        {graphs.map((graph, index) => {
+          const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
+          if (!sensor) {
+            // console.log('Could not find sensor config for graph:', graph)
+            return null
+          }
 
-                  return (
-                    <Draggable key={graph.id} draggableId={graph.id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="relative"
-                          style={{
-                            minHeight: cardHeight,
-                            minWidth: cardWidth,
-                            transform: snapshot.isDragging ? 'rotate(5deg)' : 'none'
-                          }}
-                        >
-                          <Card className="h-full p-4 relative">
-                            {isEditing && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
-                                onClick={() => handleDeleteGraph(graph.id)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
-                            <div style={{ height: cardHeight - 32 }}>
-                              <GraphWidget
-                                title={`${sensor.name} (${sensor.unit})`}
-                                sensorType={sensor.id}
-                              />
-                            </div>
-                          </Card>
-                        </div>
-                      )}
-                    </Draggable>
-                  )
-                })}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+          return (
+            <div
+              className="relative"
+              style={{
+                minHeight: cardHeight,
+                minWidth: cardWidth
+              }}
+            >
+              <Card key={graph.id} className="p-4 relative">
+                {isEditing && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
+                    onClick={() => handleDeleteGraph(graph.id)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+                <div style={{ height: cardHeight - 32 }}>
+                  <GraphWidget
+                    title={`${sensor.name} (${sensor.unit})`}
+                    sensorType={sensor.id}
+                  />
+                </div>
+              </Card>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
