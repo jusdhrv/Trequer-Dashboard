@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import GraphWidget from "../../components/GraphWidget"
@@ -15,45 +15,28 @@ export default function DashboardPage() {
   const [graphs, setGraphs] = useState<Array<{ id: string; sensorType: string }>>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
-  const [screenDimensions, setScreenDimensions] = useState({ width: 0, height: 0 })
-  const dashboardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchSensorConfigs()
   }, [])
 
-  // Measure synchronously before paint and on any resize of the container
-  useLayoutEffect(() => {
-    if (!dashboardRef.current) return
-    const update = () => updateScreenDimensions()
-    const ro = new ResizeObserver(update)
-    ro.observe(dashboardRef.current)
-    update() // initial measure
-    return () => ro.disconnect()
-  }, [])
-
-  const updateScreenDimensions = () => {
-    if (dashboardRef.current) {
-      const rect = dashboardRef.current.getBoundingClientRect()
-      setScreenDimensions({
-        width: rect.width,
-        height: rect.height
-      })
-    }
-  }
-
   const fetchSensorConfigs = async () => {
     try {
+      // console.log('Fetching sensor configurations...')
       const response = await fetch('/api/sensors/config')
       const data = await response.json()
+
+      // console.log('API Response:', data)
 
       if (data.error) {
         throw new Error(data.error)
       }
 
       if (data.configs) {
+        // console.log('Received sensor configs:', data.configs)
         setSensorConfigs(data.configs)
 
+        // Initialize graphs for each enabled sensor
         const enabledGraphs = data.configs
           .filter((config: SensorConfig) => config.is_enabled)
           .map((config: SensorConfig) => ({
@@ -61,8 +44,10 @@ export default function DashboardPage() {
             sensorType: config.id
           }))
 
+        // console.log('Setting up graphs for enabled sensors:', enabledGraphs)
         setGraphs(enabledGraphs)
       } else {
+        // console.log('No sensor configs found in response:', data)
         toast({
           title: "Warning",
           description: "No sensor configurations found",
@@ -97,10 +82,12 @@ export default function DashboardPage() {
       sensorType: enabledSensors[0].id
     }
 
+    // console.log('Adding new graph:', newGraph)
     setGraphs(prev => [...prev, newGraph])
   }
 
   const handleDeleteGraph = (graphId: string) => {
+    // console.log('Deleting graph:', graphId)
     setGraphs(prev => prev.filter(graph => graph.id !== graphId))
   }
 
@@ -111,38 +98,9 @@ export default function DashboardPage() {
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
 
+    // console.log('Reordering graphs:', items)
     setGraphs(items)
   }
-
-  // Calculate optimal card dimensions
-  const calculateCardDimensions = () => {
-    const { width, height } = screenDimensions
-    const headerHeight = 120 // Approximate header height
-    const padding = 32 // Total padding
-    const gap = 24 // Gap between cards
-
-    const availableHeight = height - headerHeight - padding
-    const availableWidth = width - padding
-
-    // Calculate grid layout
-    const totalCards = graphs.length + 1 // +1 for video widget
-    const cols = Math.ceil(Math.sqrt(totalCards))
-    const rows = Math.ceil(totalCards / cols)
-
-    // Calculate card dimensions
-    const cardWidth = Math.floor((availableWidth - (gap * (cols - 1))) / cols)
-    const cardHeight = Math.floor((availableHeight - (gap * (rows - 1))) / rows)
-
-    return {
-      // Give each card a minimum width and height in a 16x10 ratio
-      cardWidth: Math.max(cardWidth, 320), // Minimum width
-      cardHeight: Math.max(cardHeight, 200), // Minimum height
-      cols,
-      rows
-    }
-  }
-
-  const { cardWidth, cardHeight, cols } = calculateCardDimensions()
 
   if (isLoading) {
     return (
@@ -153,13 +111,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div
-      ref={dashboardRef}
-      className="h-screen w-full p-4 overflow-hidden"
-      style={{ height: '100vh' }}
-    >
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Dashboard</h1>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
@@ -182,62 +135,35 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Dynamic Grid */}
-      <div
-        className="grid gap-6"
-        style={{
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          height: `calc(100vh - 120px)`,
-          gridAutoRows: 'minmax(200px, 1fr)',
-          maxWidth: '100%',
-          overflow: 'hidden'
-        }}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         {/* Video Card */}
-        <div
-          key={`video-${cardWidth}x${cardHeight}`}
-          className="relative"
-          style={{
-            height: cardHeight,
-            width: '100%'
-          }}
-        >
-          <Card className="h-full overflow-hidden">
-            <VideoWidget />
-          </Card>
-        </div>
+        <VideoWidget />
 
         {/* Graph Cards */}
         {graphs.map((graph, index) => {
           const sensor = sensorConfigs.find(s => s.id === graph.sensorType)
-          if (!sensor) return null
+          if (!sensor) {
+            // console.log('Could not find sensor config for graph:', graph)
+            return null
+          }
 
           return (
-            <div
-              key={`${graph.id}-${cardWidth}x${cardHeight}`}  // re-mount on size changes
-              className="relative"
-              style={{
-                height: cardHeight,
-                width: '100%'
-              }}
-            >
-              <Card className="h-full p-4 relative overflow-hidden">
-                {isEditing && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
-                    onClick={() => handleDeleteGraph(graph.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-                <GraphWidget
-                  title={`${sensor.name} (${sensor.unit})`}
-                  sensorType={sensor.id}
-                />
-              </Card>
-            </div>
+            <Card key={graph.id} className="p-4 relative">
+              {isEditing && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-1 right-1 z-10 bg-background/50 hover:bg-background/80"
+                  onClick={() => handleDeleteGraph(graph.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+              <GraphWidget
+                title={`${sensor.name} (${sensor.unit})`}
+                sensorType={sensor.id}
+              />
+            </Card>
           )
         })}
       </div>
