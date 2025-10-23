@@ -69,12 +69,12 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
       pollingInterval === "10s"
         ? 10000
         : pollingInterval === "30s"
-        ? 30000
-        : pollingInterval === "1m"
-        ? 60000
-        : pollingInterval === "5m"
-        ? 300000
-        : 30000; // default to 30s
+          ? 30000
+          : pollingInterval === "1m"
+            ? 60000
+            : pollingInterval === "5m"
+              ? 300000
+              : 30000; // default to 30s
 
     const interval = setInterval(fetchData, intervalMs);
     return () => clearInterval(interval);
@@ -213,7 +213,7 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">{getSensorName()}</h3>
         <Sheet>
@@ -221,7 +221,7 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute middle-1 right-1 bg-background/50 hover:bg-background/80"
+              className="bg-background/50 hover:bg-background/80"
             >
               <Settings2 className="h-4 w-4" />
             </Button>
@@ -332,66 +332,66 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="h-[400px] relative" ref={chartRef}>
-        {data.length > 0 ? (
-          <>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--muted-foreground))"
-                />
-                <XAxis
-                  dataKey="index"
-                  type="number"
-                  domain={[0, data.length - 1]}
-                  tickFormatter={formatXAxisTick}
-                  interval={0}
-                  stroke="hsl(var(--foreground))"
-                />
-                <YAxis
-                  domain={getYAxisDomain()}
-                  tickFormatter={formatYAxisTick}
-                  stroke="hsl(var(--foreground))"
-                />
-                <Tooltip
-                  labelFormatter={formatTooltipTime}
-                  formatter={(value: number) => [value.toFixed(2), title]}
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    color: "hsl(var(--foreground))",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="hsl(var(--primary))"
-                  isAnimationActive={false}
-                  dot={false}
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-            <EventOverlay
-              sensorId={selectedSensor}
-              startTime={
-                data[0]?.timestamp ? new Date(data[0].timestamp) : new Date()
-              }
-              endTime={
-                data[data.length - 1]?.timestamp
-                  ? new Date(data[data.length - 1].timestamp)
-                  : new Date()
-              }
-              chartWidth={chartDimensions.width}
-              chartHeight={chartDimensions.height}
-            />
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-full">
+      <div className="relative flex-1 p-4">
+        <div className="w-full h-full flex items-center justify-center" ref={chartRef}>
+          {data.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <XAxis
+                    dataKey="index"
+                    type="number"
+                    domain={[0, data.length - 1]}
+                    tickFormatter={formatXAxisTick}
+                    interval={0}
+                    stroke="hsl(var(--foreground))"
+                  />
+                  <YAxis
+                    domain={getYAxisDomain()}
+                    tickFormatter={formatYAxisTick}
+                    stroke="hsl(var(--foreground))"
+                  />
+                  <Tooltip
+                    labelFormatter={formatTooltipTime}
+                    formatter={(value: number) => [value.toFixed(2), title]}
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      color: "hsl(var(--foreground))",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="hsl(var(--primary))"
+                    isAnimationActive={false}
+                    dot={false}
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+              <EventOverlay
+                sensorId={selectedSensor}
+                startTime={
+                  data[0]?.timestamp ? new Date(data[0].timestamp) : new Date()
+                }
+                endTime={
+                  data[data.length - 1]?.timestamp
+                    ? new Date(data[data.length - 1].timestamp)
+                    : new Date()
+                }
+                chartWidth={chartDimensions.width}
+                chartHeight={chartDimensions.height}
+              />
+            </>
+          ) : (
             <p className="text-muted-foreground">No data available</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

@@ -33,11 +33,11 @@ const VideoWidget = () => {
       <CardHeader>
         <CardTitle>Surface View</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="aspect-video bg-gray-200 flex items-center justify-center relative">
+      <CardContent className="h-full p-4">
+        <div className="w-full h-full bg-gray-200 rounded-md overflow-hidden flex items-center justify-center">
           <video
             ref={videoRef}
-            className="w-full h-full object-cover"
+            className="max-w-full max-h-full object-contain"
             autoPlay
             muted
             loop
