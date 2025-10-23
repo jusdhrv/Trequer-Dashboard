@@ -138,7 +138,9 @@ export default function DashboardPage() {
       {/* Alternative grid layout for better landscape card display */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Video Card */}
-        <VideoWidget />
+        <Card className="p-4 relative aspect-[16/10] min-h-[200px]">
+          <VideoWidget />
+        </Card>
 
         {/* Graph Cards */}
         {graphs.map((graph, index) => {

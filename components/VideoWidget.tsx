@@ -29,30 +29,32 @@ const VideoWidget = () => {
   }
 
   return (
-    <Card className="p-4 relative aspect-[16/10] min-h-[200px]">
-      <CardHeader>
-        <CardTitle>Surface View</CardTitle>
-      </CardHeader>
-      <CardContent className="h-full p-4">
-        <div className="w-full h-full bg-gray-200 rounded-md overflow-hidden flex items-center justify-center">
-          <video
-            ref={videoRef}
-            className="max-w-full max-h-full object-contain"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="/placeholder-video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          {/* <Button
-            className="absolute bottom-4 right-4"
-            onClick={takeSnapshot}
-          >
-            <Camera className="mr-2 h-4 w-4" />
-            Take Snapshot
-          </Button> */}
+    <div className="relative h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Surface View</h3>
+      </div>
+      <div className="relative flex-1 p-4">
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-full bg-gray-200 rounded-md overflow-hidden flex items-center justify-center">
+            <video
+              ref={videoRef}
+              className="max-w-full max-h-full object-contain"
+              autoPlay
+              muted
+              loop
+              playsInline
+            >
+              <source src="/placeholder-video.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            {/* <Button
+              className="absolute bottom-4 right-4"
+              onClick={takeSnapshot}
+            >
+              <Camera className="mr-2 h-4 w-4" />
+              Take Snapshot
+            </Button> */}
+          </div>
         </div>
         {/* <canvas ref={canvasRef} className="hidden" width="640" height="360" />
         {snapshotUrl && (
@@ -61,10 +63,9 @@ const VideoWidget = () => {
             <Button onClick={exportSnapshot}>Export Snapshot</Button>
           </div>
         )} */}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
 export default VideoWidget
-
