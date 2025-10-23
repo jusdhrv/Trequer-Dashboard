@@ -29,7 +29,7 @@ const VideoWidget = () => {
   }
 
   return (
-    <Card className="w-full h-full">
+    <Card className="p-4 relative aspect-[16/10] min-h-[200px]">
       <CardHeader>
         <CardTitle>Surface View</CardTitle>
       </CardHeader>
