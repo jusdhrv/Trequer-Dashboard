@@ -64,7 +64,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '1h';
-    const sensorId = searchParams.get('sensorId'); // Optional
+    const sensorId = searchParams.get('sensorId') ?? undefined; // Convert null to undefined
 
     // console.log(`API GET: timeRange=${timeRange}, sensorId=${sensorId || 'all'}`);
 
