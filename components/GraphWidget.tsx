@@ -46,7 +46,7 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   const [sensors, setSensors] = useState<SensorConfig[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<any[]>([]);
-  const [timeRange, setTimeRange] = useState("1h");
+  const [timeRange, setTimeRange] = useState("5min");
   const [isSettingsChanged, setIsSettingsChanged] = useState(false);
   const [pollingInterval, setPollingInterval] = useState("30s");
   const [proMode, setProMode] = useState(false);

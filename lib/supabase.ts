@@ -115,7 +115,7 @@ export async function addSensorReading(readings: SensorReading[]) {
     return true
 }
 
-export async function getSensorReadings(timeRange: string = '1h', sensorId?: string) {
+export async function getSensorReadings(timeRange: string = '5min', sensorId?: string) {
   const now = new Date();
   let cutoff: Date;
 
@@ -149,8 +149,8 @@ export async function getSensorReadings(timeRange: string = '1h', sensorId?: str
       cutoff = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
       break;
     default:
-      cutoff = new Date(now.getTime() - 60 * 60 * 1000); // Default to 1h
-      console.warn(`Invalid timeRange: ${timeRange}, defaulting to 1h`);
+      cutoff = new Date(now.getTime() - 5 * 60 * 1000); // Default to 5min
+      console.warn(`Invalid timeRange: ${timeRange}, defaulting to 5min`);
   }
 
   // console.log(`Querying sensor_readings: timeRange=${timeRange}, sensorId=${sensorId || 'all'}, cutoff=${cutoff.toISOString()}`);
