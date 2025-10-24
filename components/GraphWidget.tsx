@@ -202,7 +202,13 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
     const startTime = new Date(data[0].timestamp).getTime();
     const currentTime = new Date(item.timestamp).getTime();
     const diffMinutes = Math.floor((currentTime - startTime) / 60000);
-    return `${diffMinutes} min`;
+    if (diffMinutes == 0) {
+      const diffSeconds = Math.floor((currentTime - startTime) / 10000);
+      return `${diffSeconds} sec`;
+    }
+    else {
+      return `${diffMinutes} min`;
+    }
   };
 
   const formatXAxisTick = (index: number) => {
