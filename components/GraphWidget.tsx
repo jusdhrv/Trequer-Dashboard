@@ -225,10 +225,15 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
     return sensor ? sensor.name : title;
   };
 
+  const getSensorUnits = () => {
+    const sensor = sensors.find((sensor) => sensor.id === selectedSensor);
+    return sensor ? sensor.unit : title;
+  };
+
   return (
     <div className="relative h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">{getSensorName()}</h3>
+        <h3 className="text-lg font-semibold">{getSensorName()} ({getSensorUnits()})</h3>
         <Sheet>
           <SheetTrigger asChild>
             <Button
