@@ -47,7 +47,6 @@ const RawDataPage = () => {
     fetchSensors()
   }, [])
 
-  // Initialize state after component mounts to prevent hydration mismatch
   useEffect(() => {
     setDateRange(getDefaultDateRange())
     setIsClient(true)
@@ -78,12 +77,18 @@ const RawDataPage = () => {
   }
 
   const fetchData = async () => {
-    if (!dateRange?.from || !dateRange?.to) return
+    if (!dateRange?.from || !dateRange?.to || !selectedSensor) return
 
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/sensors?from=${dateRange.from.toISOString()}&to=${dateRange.to.toISOString()}`)
+      const response = await fetch(
+        `/api/sensors?from=${dateRange.from.toISOString()}&to=${dateRange.to.toISOString()}&sensorId=${selectedSensor}`
+      )
       const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
 
       if (data.readings) {
         // Process the data based on the selected time scale
@@ -117,15 +122,15 @@ const RawDataPage = () => {
             return readingTime >= currentTime && readingTime < nextTime
           })
 
-          // Calculate average for the selected sensor in this interval
+          // Calculate average value for the selected sensor in this interval
           if (intervalReadings.length > 0) {
             const sum = intervalReadings.reduce((acc: number, reading: any) => {
-              return acc + (reading[selectedSensor] || 0)
+              return acc + (Number(reading.value) || 0)
             }, 0)
 
             processedData.push({
               timestamp: currentTime.toISOString(),
-              [selectedSensor]: Number((sum / intervalReadings.length).toFixed(2))
+              value: Number((sum / intervalReadings.length).toFixed(2))
             })
           }
 
@@ -133,12 +138,15 @@ const RawDataPage = () => {
         }
 
         setRawData(processedData)
+      } else {
+        setRawData([])
       }
     } catch (error) {
       console.error('Error fetching sensor data:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       toast({
         title: "Error",
-        description: "Failed to fetch sensor data",
+        description: `Failed to fetch sensor data: ${errorMessage}`,
         variant: "destructive",
       })
     } finally {
@@ -147,16 +155,14 @@ const RawDataPage = () => {
   }
 
   const handleExport = async () => {
-    if (!dateRange?.from || !dateRange?.to) return
+    if (!dateRange?.from || !dateRange?.to || !selectedSensor) return
 
     const selectedSensorConfig = sensors.find(s => s.id === selectedSensor)
     if (!selectedSensorConfig) return
 
-    // Add loading state for export operation
     setIsLoading(true)
 
     try {
-      // Handle empty data case
       if (rawData.length === 0) {
         const emptyData = {
           message: "No valid data for the selected time range",
@@ -164,7 +170,6 @@ const RawDataPage = () => {
           selectedSensor: selectedSensorConfig.name
         }
 
-        // Use the hook for consistent compression even for empty data
         await compressAndDownload({
           jsonData: emptyData,
           filename: `${selectedSensorConfig.name}_no_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}`
@@ -172,7 +177,6 @@ const RawDataPage = () => {
         return
       }
 
-      // Prepare metadata for the actual data export
       const exportData = {
         metadata: {
           sensor: selectedSensorConfig,
@@ -187,30 +191,27 @@ const RawDataPage = () => {
             processedAt: new Date().toISOString()
           }
         },
-        data: rawData // Your existing processed data
+        data: rawData
       }
 
-      // Use the compression hook
       await compressAndDownload({
         jsonData: exportData,
         filename: `${selectedSensorConfig.name}_data_${format(dateRange.from, 'yyyyMMdd_HHmmss')}_${format(dateRange.to, 'yyyyMMdd_HHmmss')}`
       })
 
-      // Success feedback
       toast({
         title: "Export Successful",
         description: `Data exported as ZIP (${rawData.length} data points)`,
       })
-
     } catch (error) {
       console.error('Export failed:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       toast({
         title: "Export Failed",
-        description: "Please try again or check console for details",
+        description: `Please try again: ${errorMessage}`,
         variant: "destructive",
       })
 
-      // Fallback to raw JSON if compression fails (hook's built-in fallback will handle this too)
       const fallbackDataStr = JSON.stringify(rawData.length === 0
         ? { message: "No valid data for the selected time range" }
         : rawData, null, 2)
@@ -222,14 +223,11 @@ const RawDataPage = () => {
       fallbackLink.href = fallbackUrl
       fallbackLink.click()
       URL.revokeObjectURL(fallbackUrl)
-
     } finally {
-      setIsLoading(false) // Always reset loading state
+      setIsLoading(false)
     }
   }
 
-
-  // Don't render until after client-side hydration
   if (!isClient) {
     return null
   }
@@ -323,7 +321,6 @@ const RawDataPage = () => {
             >
               {isLoading ? "Compressing..." : "Export as ZIP"}
             </Button>
-
           </div>
         </CardContent>
       </Card>
@@ -332,4 +329,3 @@ const RawDataPage = () => {
 }
 
 export default RawDataPage
-
