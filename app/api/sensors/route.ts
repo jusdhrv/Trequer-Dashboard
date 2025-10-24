@@ -64,13 +64,12 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '1h';
-    const sensorId = searchParams.get('sensorId') ?? undefined; // Convert null to undefined
+    const sensorId = searchParams.get('sensorId') ?? undefined;
 
     // console.log(`API GET: timeRange=${timeRange}, sensorId=${sensorId || 'all'}`);
 
     const readings = await getSensorReadings(timeRange, sensorId);
 
-    // Transform to graph-ready format
     const transformedReadings = readings.map(reading => ({
       timestamp: reading.timestamp,
       value: reading.value,
@@ -81,8 +80,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ readings: transformedReadings });
   } catch (error) {
     console.error('Error reading sensor data:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error', details: errorMessage },
       { status: 500 }
     );
   }
