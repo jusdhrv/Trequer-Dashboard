@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     const timeRange = searchParams.get('timeRange') || '1h';
     const sensorId = searchParams.get('sensorId'); // Optional
 
-    console.log(`API GET: timeRange=${timeRange}, sensorId=${sensorId || 'all'}`);
+    // console.log(`API GET: timeRange=${timeRange}, sensorId=${sensorId || 'all'}`);
 
     const readings = await getSensorReadings(timeRange, sensorId);
 
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
       value: reading.value,
     }));
 
-    console.log('Transformed readings:', transformedReadings);
+    // console.log('Transformed readings:', transformedReadings);
 
     return NextResponse.json({ readings: transformedReadings });
   } catch (error) {

@@ -12,7 +12,7 @@ interface Reading {
 }
 
 export function processReadings(readings: any[], sensorId: string, timeRange: string) {
-  console.log('Processing readings for sensor:', sensorId, 'with data:', readings);
+  // console.log('Processing readings for sensor:', sensorId, 'with data:', readings);
   const processed = readings
     .filter(reading => reading[sensorId] !== undefined)
     .map((reading, index) => ({
@@ -21,6 +21,6 @@ export function processReadings(readings: any[], sensorId: string, timeRange: st
       index,
     }))
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-  console.log('Processed readings:', processed);
+  // console.log('Processed readings:', processed);
   return processed;
 }

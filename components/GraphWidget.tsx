@@ -124,13 +124,13 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
 
   const fetchData = async () => {
   try {
-    console.log(`Fetching data for sensor ${selectedSensor} with timeRange ${timeRange}`);
+    // console.log(`Fetching data for sensor ${selectedSensor} with timeRange ${timeRange}`);
     setIsLoading(true);
     setIsSettingsChanged(true);
     const response = await fetch(`/api/sensors?timeRange=${timeRange}&sensorId=${selectedSensor}`);
     const result = await response.json();
 
-    console.log('Received sensor readings:', result);
+    // console.log('Received sensor readings:', result);
 
     if (result.error) {
       throw new Error(result.error);
@@ -142,10 +142,10 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
         value: Number(reading.value),
         index,
       }));
-      console.log('Processed data:', processedData);
+      // console.log('Processed data:', processedData);
       setData(processedData);
     } else {
-      console.log('No readings in response');
+      // console.log('No readings in response');
       setData([]);
     }
   } catch (error) {

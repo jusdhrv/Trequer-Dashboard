@@ -153,7 +153,7 @@ export async function getSensorReadings(timeRange: string = '1h', sensorId?: str
       console.warn(`Invalid timeRange: ${timeRange}, defaulting to 1h`);
   }
 
-  console.log(`Querying sensor_readings: timeRange=${timeRange}, sensorId=${sensorId || 'all'}, cutoff=${cutoff.toISOString()}`);
+  // console.log(`Querying sensor_readings: timeRange=${timeRange}, sensorId=${sensorId || 'all'}, cutoff=${cutoff.toISOString()}`);
 
   let query = supabase
     .from('sensor_readings')
@@ -172,6 +172,6 @@ export async function getSensorReadings(timeRange: string = '1h', sensorId?: str
     throw new Error(`Failed to fetch sensor readings: ${error.message}`);
   }
 
-  console.log('Raw readings:', data);
+  // console.log('Raw readings:', data);
   return data || [];
 } 
