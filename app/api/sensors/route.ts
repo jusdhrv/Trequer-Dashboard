@@ -61,35 +61,29 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-    try {
-        const { searchParams } = new URL(request.url)
-        const timeRange = searchParams.get('timeRange') || '1h'
+  try {
+    const { searchParams } = new URL(request.url);
+    const timeRange = searchParams.get('timeRange') || '1h';
+    const sensorId = searchParams.get('sensorId'); // Optional
 
-        const readings = await getSensorReadings(timeRange)
+    console.log(`API GET: timeRange=${timeRange}, sensorId=${sensorId || 'all'}`);
 
-        // Transform the data to match the expected format
-        const transformedReadings = readings.reduce((acc: Record<string, any>[], reading) => {
-            const existingReading = acc.find(r => r.timestamp === reading.timestamp)
-            
-            if (existingReading) {
-                existingReading[reading.sensor_id] = reading.value
-            } else {
-                const newReading: Record<string, any> = {
-                    timestamp: reading.timestamp
-                }
-                newReading[reading.sensor_id] = reading.value
-                acc.push(newReading)
-            }
-            
-            return acc
-        }, [])
+    const readings = await getSensorReadings(timeRange, sensorId);
 
-        return NextResponse.json({ readings: transformedReadings })
-    } catch (error) {
-        console.error('Error reading sensor data:', error)
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        )
-    }
-} 
+    // Transform to graph-ready format
+    const transformedReadings = readings.map(reading => ({
+      timestamp: reading.timestamp,
+      value: reading.value,
+    }));
+
+    console.log('Transformed readings:', transformedReadings);
+
+    return NextResponse.json({ readings: transformedReadings });
+  } catch (error) {
+    console.error('Error reading sensor data:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error.message },
+      { status: 500 }
+    );
+  }
+}

@@ -123,38 +123,44 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
   };
 
   const fetchData = async () => {
-    try {
-      // console.log(`Fetching data for sensor ${selectedSensor} with timeRange ${timeRange}`)
-      setIsSettingsChanged(true);
-      const response = await fetch(`/api/sensors?timeRange=${timeRange}`);
-      const result = await response.json();
+  try {
+    console.log(`Fetching data for sensor ${selectedSensor} with timeRange ${timeRange}`);
+    setIsLoading(true);
+    setIsSettingsChanged(true);
+    const response = await fetch(`/api/sensors?timeRange=${timeRange}&sensorId=${selectedSensor}`);
+    const result = await response.json();
 
-      // console.log('Received sensor readings:', result)
+    console.log('Received sensor readings:', result);
 
-      if (result.readings) {
-        const processedData = processReadings(
-          result.readings,
-          selectedSensor,
-          timeRange
-        );
-        // console.log('Processed data:', processedData)
-        if (processedData.length > 0) {
-          setData(processedData);
-        } else {
-          // console.log('No data available for the selected sensor and time range')
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching sensor data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch sensor data",
-        variant: "destructive",
-      });
-    } finally {
-      setTimeout(() => setIsSettingsChanged(false), 1000);
+    if (result.error) {
+      throw new Error(result.error);
     }
-  };
+
+    if (result.readings) {
+      const processedData = result.readings.map((reading: any, index: number) => ({
+        timestamp: reading.timestamp,
+        value: Number(reading.value),
+        index,
+      }));
+      console.log('Processed data:', processedData);
+      setData(processedData);
+    } else {
+      console.log('No readings in response');
+      setData([]);
+    }
+  } catch (error) {
+    console.error('Error fetching sensor data:', error);
+    toast({
+      title: 'Error',
+      description: `Failed to fetch sensor data: ${error.message}`,
+      variant: 'destructive',
+    });
+    setData([]);
+  } finally {
+    setIsLoading(false);
+    setTimeout(() => setIsSettingsChanged(false), 1000);
+  }
+};
 
   const handleTimeRangeChange = (value: string) => {
     // console.log('Changing time range to:', value)
@@ -333,66 +339,59 @@ export default function GraphWidget({ title, sensorType }: GraphWidgetProps) {
         </Sheet>
       </div>
       <div className="relative flex-1 p-4">
-        <div className="w-full h-full flex items-center justify-center" ref={chartRef}>
-          {data.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <XAxis
-                    dataKey="index"
-                    type="number"
-                    domain={[0, data.length - 1]}
-                    tickFormatter={formatXAxisTick}
-                    interval={0}
-                    stroke="hsl(var(--foreground))"
-                  />
-                  <YAxis
-                    domain={getYAxisDomain()}
-                    tickFormatter={formatYAxisTick}
-                    stroke="hsl(var(--foreground))"
-                  />
-                  <Tooltip
-                    labelFormatter={formatTooltipTime}
-                    formatter={(value: number) => [value.toFixed(2), title]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      color: "hsl(var(--foreground))",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="hsl(var(--primary))"
-                    isAnimationActive={false}
-                    dot={false}
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-              <EventOverlay
-                sensorId={selectedSensor}
-                startTime={
-                  data[0]?.timestamp ? new Date(data[0].timestamp) : new Date()
-                }
-                endTime={
-                  data[data.length - 1]?.timestamp
-                    ? new Date(data[data.length - 1].timestamp)
-                    : new Date()
-                }
-                chartWidth={chartDimensions.width}
-                chartHeight={chartDimensions.height}
-              />
-            </>
-          ) : (
-            <p className="text-muted-foreground">No data available</p>
-          )}
-        </div>
-      </div>
+  <div className="w-full h-full flex items-center justify-center" ref={chartRef}>
+    {isLoading ? (
+      <p className="text-muted-foreground">Loading data...</p>
+    ) : data.length > 0 ? (
+      <>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" />
+            <XAxis
+              dataKey="index"
+              type="number"
+              domain={[0, data.length - 1]}
+              tickFormatter={formatXAxisTick}
+              interval={0}
+              stroke="hsl(var(--foreground))"
+            />
+            <YAxis
+              domain={getYAxisDomain()}
+              tickFormatter={formatYAxisTick}
+              stroke="hsl(var(--foreground))"
+            />
+            <Tooltip
+              labelFormatter={formatTooltipTime}
+              formatter={(value: number) => [value.toFixed(2), title]}
+              contentStyle={{
+                backgroundColor: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                color: "hsl(var(--foreground))",
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="hsl(var(--primary))"
+              isAnimationActive={false}
+              dot={false}
+              strokeWidth={2}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <EventOverlay
+          sensorId={selectedSensor}
+          startTime={data[0]?.timestamp ? new Date(data[0].timestamp) : new Date()}
+          endTime={data[data.length - 1]?.timestamp ? new Date(data[data.length - 1].timestamp) : new Date()}
+          chartWidth={chartDimensions.width}
+          chartHeight={chartDimensions.height}
+        />
+      </>
+    ) : (
+      <p className="text-muted-foreground">No data available</p>
+    )}
+  </div>
+</div>
     </div>
   );
 }

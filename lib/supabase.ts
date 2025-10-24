@@ -115,40 +115,63 @@ export async function addSensorReading(readings: SensorReading[]) {
     return true
 }
 
-export async function getSensorReadings(timeRange: string = '1h') {
-    const now = new Date()
-    let cutoff = new Date(now)
+export async function getSensorReadings(timeRange: string = '1h', sensorId?: string) {
+  const now = new Date();
+  let cutoff: Date;
 
-    switch (timeRange) {
-        case '1h':
-            cutoff.setHours(now.getHours() - 1)
-            break
-        case '6h':
-            cutoff.setHours(now.getHours() - 6)
-            break
-        case '24h':
-            cutoff.setHours(now.getHours() - 24)
-            break
-        case '7d':
-            cutoff.setDate(now.getDate() - 7)
-            break
-        case '14d':
-            cutoff.setDate(now.getDate() - 14)
-            break
-        default:
-            cutoff.setHours(now.getHours() - 1)
-    }
+  // Parse timeRange to match GraphWidget options
+  switch (timeRange) {
+    case '1min':
+      cutoff = new Date(now.getTime() - 1 * 60 * 1000);
+      break;
+    case '5min':
+      cutoff = new Date(now.getTime() - 5 * 60 * 1000);
+      break;
+    case '15min':
+      cutoff = new Date(now.getTime() - 15 * 60 * 1000);
+      break;
+    case '30min':
+      cutoff = new Date(now.getTime() - 30 * 60 * 1000);
+      break;
+    case '1h':
+      cutoff = new Date(now.getTime() - 60 * 60 * 1000);
+      break;
+    case '6h':
+      cutoff = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+      break;
+    case '24h':
+      cutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      break;
+    case '7d':
+      cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case '14d':
+      cutoff = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      break;
+    default:
+      cutoff = new Date(now.getTime() - 60 * 60 * 1000); // Default to 1h
+      console.warn(`Invalid timeRange: ${timeRange}, defaulting to 1h`);
+  }
 
-    const { data, error } = await supabase
-        .from('sensor_readings')
-        .select('*')
-        .gte('timestamp', cutoff.toISOString())
-        .order('timestamp', { ascending: true })
-    
-    if (error) {
-        console.error('Error fetching sensor readings:', error)
-        throw error
-    }
-    
-    return data
+  console.log(`Querying sensor_readings: timeRange=${timeRange}, sensorId=${sensorId || 'all'}, cutoff=${cutoff.toISOString()}`);
+
+  let query = supabase
+    .from('sensor_readings')
+    .select('sensor_id, value, timestamp')
+    .gte('timestamp', cutoff.toISOString())
+    .lte('timestamp', now.toISOString())
+    .order('timestamp', { ascending: true });
+
+  if (sensorId) {
+    query = query.eq('sensor_id', sensorId);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error('Supabase query error:', error);
+    throw new Error(`Failed to fetch sensor readings: ${error.message}`);
+  }
+
+  console.log('Raw readings:', data);
+  return data || [];
 } 
